@@ -1,4 +1,4 @@
-package com.dcy;
+package com.dcy.rpc;
 
 /**
  * @author Kyle

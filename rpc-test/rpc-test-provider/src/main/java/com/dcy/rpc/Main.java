@@ -1,4 +1,6 @@
-package com.dcy;
+package com.dcy.rpc;
+
+import com.dcy.rpc.ProviderStarter;
 
 /**
  * @author Kyle
@@ -6,6 +8,6 @@ package com.dcy;
  */
 public class Main {
     public static void main(String[] args) {
-        new ProviderStarter();
+        ProviderStarter.getInstance();
     }
 }
