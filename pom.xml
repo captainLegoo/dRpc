@@ -12,6 +12,7 @@
         <module>rpc-test</module>
         <module>rpc-consumer</module>
         <module>rpc-provider</module>
+        <module>rpc-common</module>
     </modules>
 
     <properties>
