@@ -14,6 +14,7 @@
     <modules>
         <module>rpc-test-consumer</module>
         <module>rpc-test-provider</module>
+        <module>rpc-test-api</module>
     </modules>
 
     <properties>
