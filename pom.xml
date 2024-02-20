@@ -13,6 +13,7 @@
         <module>rpc-consumer</module>
         <module>rpc-provider</module>
         <module>rpc-common</module>
+        <module>rpc-registrycenter</module>
     </modules>
 
     <properties>
@@ -27,6 +28,9 @@
         <hessian.version>4.0.63</hessian.version>
         <fastjson2.version>2.0.42</fastjson2.version>
         <zookeeper.version>3.9.1</zookeeper.version>
+        <junit.version>5.10.0</junit.version>
+        <curator.framework.version>5.1.0</curator.framework.version>
+        <curator.recipes.version>4.0.0</curator.recipes.version>
     </properties>
 
     <dependencyManagement>
@@ -78,6 +82,27 @@
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>${zookeeper.version}</version>
+            </dependency>
+
+            <!-- junit -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- curator-framework -->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>${curator.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.recipes.version}</version>
             </dependency>
 
         </dependencies>
