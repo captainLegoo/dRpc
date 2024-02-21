@@ -10,8 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>rpc-test</module>
-        <module>rpc-consumer</module>
-        <module>rpc-provider</module>
+        <module>rpc-core</module>
         <module>rpc-common</module>
         <module>rpc-registrycenter</module>
     </modules>

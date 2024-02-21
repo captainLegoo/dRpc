@@ -26,14 +26,20 @@
     <dependencies>
         <dependency>
             <groupId>com.dcy</groupId>
-            <artifactId>rpc-provider</artifactId>
+            <artifactId>rpc-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
+        <!--lombok-->
         <dependency>
-            <groupId>com.dcy</groupId>
-            <artifactId>rpc-consumer</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- slf4j-reload4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-reload4j</artifactId>
         </dependency>
     </dependencies>
 

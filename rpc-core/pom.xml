@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rpc-provider</artifactId>
+    <artifactId>rpc-core</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -52,12 +52,6 @@
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
-        </dependency>
-
-        <!-- zookeeper -->
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
         </dependency>
     </dependencies>
 
