@@ -1,6 +1,6 @@
 package com.dcy.rpc;
 
-import com.dcy.rpc.ProviderStarter;
+import com.dcy.rpc.bootstrap.DRpcBootstrap;
 
 /**
  * @author Kyle
@@ -8,6 +8,11 @@ import com.dcy.rpc.ProviderStarter;
  */
 public class Main {
     public static void main(String[] args) {
-        ProviderStarter.getInstance();
+        DRpcBootstrap.getInstance()
+                .setBootstrapName("RPC-Provider")
+                .port(9000)
+                //.registry()
+                //.scanAndPublish("com.dcy.controller")
+                .start();
     }
 }
