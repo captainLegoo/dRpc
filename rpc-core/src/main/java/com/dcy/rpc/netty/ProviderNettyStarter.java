@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * @author Kyle
  * @date 2024/02/21
+ *
+ * provider netty start
  */
 @Slf4j
 public class ProviderNettyStarter {
@@ -38,10 +40,11 @@ public class ProviderNettyStarter {
                             ChannelPipeline pipeline = socketChannel.pipeline();
                             pipeline.addLast(new StringDecoder());
                             pipeline.addLast(new StringEncoder());
+                            pipeline.addLast(new ProviderHandler());
                         }
                     });
-            log.info("service provider start");
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
+            log.info("service provider start");
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();
