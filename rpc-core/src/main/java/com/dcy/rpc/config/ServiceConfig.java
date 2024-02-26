@@ -16,6 +16,6 @@ public class ServiceConfig<T> {
     // interface
     private Class<?> interfaceRef;
     // implement
-    private Object implRef;
+    private Object impl;
 }
 
