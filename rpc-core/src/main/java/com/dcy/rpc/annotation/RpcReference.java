@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @date 2023/2/21
  * Adding this annotation indicates that the class will call remote service.
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RpcReference {
 }

@@ -1,18 +1,21 @@
 package com.dcy.rpc.bootstrap;
 
+import com.dcy.rpc.annotation.RpcReference;
 import com.dcy.rpc.annotation.RpcService;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.config.ServiceConfig;
+import com.dcy.rpc.enumeration.CompressTypeEnum;
+import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.netty.ProviderNettyStarter;
+import com.dcy.rpc.proxy.ProxyConfig;
 import com.dcy.rpc.util.ScanPackage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,15 +88,56 @@ public class DRpcBootstrap {
      * --------------------------------Related APIs for service callers--------------------------------
      */
 
-    public DRpcBootstrap serialize() {
+    public DRpcBootstrap serialize(SerializeTypeEnum serializeTypeEnum) {
+        globalConfig.setSerializableType(serializeTypeEnum);
         return this;
     }
 
-    public DRpcBootstrap compress() {
+    public DRpcBootstrap compress(CompressTypeEnum compressTypeEnum) {
+        globalConfig.setCompressType(compressTypeEnum);
         return this;
     }
 
-    public DRpcBootstrap reference() {
+    /**
+     * Create a proxy object based on the package path and specific variables
+     * TODO: In non-Spring environments, modifying properties through reflection will fail.
+     * @param packageName
+     * @return
+     */
+    public DRpcBootstrap reference(String packageName) {
+        try {
+            List<String> classNameList = ScanPackage.scanPackage(packageName);
+            List<? extends Class<?>> classList = classNameList.stream().map(className -> {
+                try {
+                    return Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+
+            for (Class<?> clazz : classList) {
+                Object instance = clazz.getDeclaredConstructor().newInstance();
+
+                Field[] declaredFieldsArray = clazz.getDeclaredFields();
+                List<Field> fieldList = Arrays.stream(declaredFieldsArray).filter(field -> {
+                    return field.getAnnotation(RpcReference.class) != null;
+                }).collect(Collectors.toList());
+
+                // create each field that reference
+                for (Field field : fieldList) {
+                    ProxyConfig<?> proxyConfig = new ProxyConfig<>(field.getType());
+                    // Use ProxyConfig to create a proxy object and inject the proxy object into the field
+                    try {
+                        field.setAccessible(true);
+                        field.set(instance, proxyConfig.get());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to set proxy instance to field: " + field.getName(), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -157,6 +201,7 @@ public class DRpcBootstrap {
 
     /**
      * publish service to registration center
+     *
      * @param serviceConfig
      * @return
      */
@@ -178,5 +223,13 @@ public class DRpcBootstrap {
     public void start() {
         ProviderNettyStarter providerNettyStarter = new ProviderNettyStarter(globalConfig.getPort());
         providerNettyStarter.start();
+    }
+
+    /**
+     * --------------------------------Get the object of this method--------------------------------
+     */
+
+    public GlobalConfig getGlobalConfig() {
+        return globalConfig;
     }
 }
