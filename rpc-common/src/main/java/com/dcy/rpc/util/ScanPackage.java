@@ -13,6 +13,11 @@ import java.util.List;
  */
 public class ScanPackage {
 
+    /**
+     * Scan under this package and return all class
+     * @param packageName
+     * @return
+     */
     public static List<String> scanPackage(String packageName) {
         return getAllClassNames(packageName);
     }
