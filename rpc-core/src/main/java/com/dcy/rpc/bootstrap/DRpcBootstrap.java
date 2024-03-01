@@ -2,6 +2,7 @@ package com.dcy.rpc.bootstrap;
 
 import com.dcy.rpc.annotation.RpcReference;
 import com.dcy.rpc.annotation.RpcService;
+import com.dcy.rpc.cache.ProviderCache;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.config.ServiceConfig;
@@ -211,7 +212,7 @@ public class DRpcBootstrap {
 
         // 2.If registration is successful, the service is cached locally
         if (true) {
-            //ProviderCache.SERVERS_LIST.put(serviceConfig.getInterfaceRef().getName(), serviceConfig);
+            ProviderCache.SERVERS_LIST.put(serviceConfig.getInterfaceRef().getName(), serviceConfig);
             return true;
         }
         return false;

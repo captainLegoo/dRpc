@@ -1,5 +1,8 @@
 package com.dcy.rpc.netty;
 
+import com.dcy.rpc.netty.ProviderHandler.MethodCallHandler;
+import com.dcy.rpc.netty.ProviderHandler.ProviderInboundHandler;
+import com.dcy.rpc.netty.ProviderHandler.ProviderOutboundHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -44,7 +47,9 @@ public class ProviderNettyStarter {
                             pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                             pipeline.addLast(new ObjectEncoder());
                             pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
-                            pipeline.addLast(new ProviderHandler());
+                            pipeline.addLast(new ProviderInboundHandler());
+                            pipeline.addLast(new MethodCallHandler());
+                            pipeline.addLast(new ProviderOutboundHandler());
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();

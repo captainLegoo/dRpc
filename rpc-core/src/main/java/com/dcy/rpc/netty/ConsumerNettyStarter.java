@@ -1,5 +1,6 @@
 package com.dcy.rpc.netty;
 
+import com.dcy.rpc.netty.ConsumerHandler.ConsumerHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -44,7 +45,7 @@ public class ConsumerNettyStarter {
                         pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                         pipeline.addLast(new ObjectEncoder());
                         pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
-                        //pipeline.addLast(new ConsumerHandler());
+                        pipeline.addLast(new ConsumerHandler());
                     }
                 });
     }
