@@ -17,6 +17,6 @@ public class BookServiceImpl implements BookService {
     @Override
     public void writeReaderName() {
         String string = userService.sayHello("dcy");
-        System.out.println("string = " + string);
+        System.out.println("writeReaderName = " + string);
     }
 }

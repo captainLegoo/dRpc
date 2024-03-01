@@ -1,6 +1,7 @@
 package com.dcy.rpc.proxy;
 
 import com.dcy.rpc.bootstrap.DRpcBootstrap;
+import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class ConsumerInvocationHandler<T> implements InvocationHandler {
-    private Class<T> interfaceRef;
+    private final Class<T> interfaceRef;
 
     public ConsumerInvocationHandler(Class<T> interfaceRef) {
         this.interfaceRef = interfaceRef;
@@ -31,7 +33,6 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // TODO set proxy object
         // 1. Encapsulate the message
         RequestPayload requestPayload = new RequestPayload()
                 .setInterfaceName(interfaceRef.getName())
@@ -41,36 +42,37 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
                 .setReturnType(method.getReturnType());
 
         GlobalConfig globalConfig = DRpcBootstrap.getInstance().getGlobalConfig();
+        long requestId = globalConfig.getIdGenerator().getId();
         RequestProtocol requestProtocol = new RequestProtocol()
-                .setRequestId(globalConfig.getIdGenerator().getId())
+                .setRequestId(requestId)
                 .setRequestType(RequestTypeEnum.REQUEST.getId())
                 .setCompressTypeId(globalConfig.getCompressType().getCompressId())
                 .setSerializeTypeId(globalConfig.getSerializableType().getSerializeId())
                 .setTimeStamp(new Date().getTime())
                 .setRequestPayload(requestPayload);
 
+        // TODO get address from registry center
         // 2.netty connection
         // 2.1.get address from registry center
 
         // 2.2.get available channel
         Channel channel = ConsumerNettyStarter.getNettyChannel("127.0.0.1", 9000);
 
-        // 3.Store the request in a local thread
-
-        // 4.Send a message
-        ChannelFuture channelFuture = channel.writeAndFlush(ProtostuffUtil.serialize(requestProtocol)).addListener(new ChannelFutureListener() {
+        // 3.Send a message
+        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+        channel.writeAndFlush(ProtostuffUtil.serialize(requestProtocol)).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture channelFuture) throws Exception {
                 if (!channelFuture.isSuccess()) {
-                    log.info("send message failed");
+                    log.info("Id:【{}】 send message failed", requestId);
+                } else {
+                    log.info("Id:【{}】 send message success", requestId);
+                    ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
                 }
             }
         });
 
-        // 5.Clean up threadLocal
-
-        // 6.Get response result
-        Object rs = channelFuture.get(5, TimeUnit.SECONDS);
-        return rs;
+        // 4.get response result
+        return completableFuture.get(5, TimeUnit.SECONDS);
     }
 }

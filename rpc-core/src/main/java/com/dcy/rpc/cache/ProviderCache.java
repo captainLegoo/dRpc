@@ -4,11 +4,15 @@ import com.dcy.rpc.config.ServiceConfig;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Kyle
  * @date 2024/02/29
+ * <p>
+ * provider ache
  */
 public class ProviderCache {
-    public static final Map<String, ServiceConfig<?>> SERVERS_LIST = new HashMap<>(16);
+    // Service publish cache
+    public static final Map<String, ServiceConfig<?>> SERVERS_LIST = new ConcurrentHashMap<>(16);
 }
