@@ -15,6 +15,7 @@
         <module>rpc-registrycenter</module>
         <module>rpc-serialization</module>
         <module>rpc-compress</module>
+        <module>rpc-interface</module>
     </modules>
 
     <properties>

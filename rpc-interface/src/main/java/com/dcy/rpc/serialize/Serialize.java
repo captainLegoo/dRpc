@@ -1,4 +1,4 @@
-package com.dcy.rpc;
+package com.dcy.rpc.serialize;
 
 /**
  * @author Kyle
