@@ -13,6 +13,8 @@
         <module>rpc-core</module>
         <module>rpc-common</module>
         <module>rpc-registrycenter</module>
+        <module>rpc-serialization</module>
+        <module>rpc-compress</module>
     </modules>
 
     <properties>
