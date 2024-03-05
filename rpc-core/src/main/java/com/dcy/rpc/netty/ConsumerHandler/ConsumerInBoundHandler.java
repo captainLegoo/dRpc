@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
  * @date 2024/02/24
  */
 @Slf4j
-public class ConsumerHandler extends SimpleChannelInboundHandler<Object> {
+public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         byte[] bytes = (byte[]) msg;

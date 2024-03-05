@@ -9,7 +9,12 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rpc-core</artifactId>
+    <groupId>com.dcy.rpc</groupId>
+    <artifactId>rpc-serialization</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>rpc-serialization-jdk</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -30,18 +35,6 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.dcy.rpc</groupId>
-            <artifactId>rpc-serialization-jdk</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.dcy.rpc</groupId>
-            <artifactId>rpc-compress-deflate</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
         <!--lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -53,30 +46,5 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-reload4j</artifactId>
         </dependency>
-
-        <!-- netty -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-        </dependency>
-
-        <!-- fastjson -->
-        <dependency>
-            <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2</artifactId>
-        </dependency>
-
-        <!-- hessian -->
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-        </dependency>
-
     </dependencies>
-
 </project>

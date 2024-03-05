@@ -46,8 +46,8 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         RequestProtocol requestProtocol = new RequestProtocol()
                 .setRequestId(requestId)
                 .setRequestType(RequestTypeEnum.REQUEST.getId())
-                .setCompressTypeId(globalConfig.getCompressType().getCompressId())
-                .setSerializeTypeId(globalConfig.getSerializableType().getSerializeId())
+                .setCompressType(globalConfig.getCompressType())
+                .setSerializeType(globalConfig.getSerializableType())
                 .setTimeStamp(new Date().getTime())
                 .setRequestPayload(requestPayload);
 
@@ -58,9 +58,13 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         // 2.2.get available channel
         Channel channel = ConsumerNettyStarter.getNettyChannel("127.0.0.1", 9000);
 
-        // 3.Send a message
+        // 3.create CompletableFuture and add to cache, Waiting to receive return information
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-        channel.writeAndFlush(ProtostuffUtil.serialize(requestProtocol)).addListener(new ChannelFutureListener() {
+
+        //
+
+        //
+        channel.writeAndFlush(requestProtocol).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture channelFuture) throws Exception {
                 if (!channelFuture.isSuccess()) {

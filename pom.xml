@@ -13,6 +13,9 @@
         <module>rpc-core</module>
         <module>rpc-common</module>
         <module>rpc-registrycenter</module>
+        <module>rpc-serialization</module>
+        <module>rpc-compress</module>
+        <module>rpc-interface</module>
     </modules>
 
     <properties>
@@ -30,6 +33,7 @@
         <junit.version>5.10.0</junit.version>
         <curator.framework.version>5.1.0</curator.framework.version>
         <curator.recipes.version>4.0.0</curator.recipes.version>
+        <junit.version>5.8.2</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -102,6 +106,14 @@
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-recipes</artifactId>
                 <version>${curator.recipes.version}</version>
+            </dependency>
+
+            <!-- junit -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
