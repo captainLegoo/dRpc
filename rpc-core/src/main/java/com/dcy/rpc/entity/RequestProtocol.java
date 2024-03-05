@@ -1,5 +1,7 @@
 package com.dcy.rpc.entity;
 
+import com.dcy.rpc.enumeration.CompressTypeEnum;
+import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,8 +22,8 @@ import lombok.experimental.Accessors;
 public class RequestProtocol {
     private long requestId;
     private byte requestType;
-    private byte serializeTypeId;
-    private byte compressTypeId;
+    private SerializeTypeEnum serializeType;
+    private CompressTypeEnum compressType;
     private long timeStamp;
     private RequestPayload requestPayload;
 }

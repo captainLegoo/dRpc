@@ -1,6 +1,7 @@
 package com.dcy.rpc.netty;
 
-import com.dcy.rpc.netty.ConsumerHandler.ConsumerHandler;
+import com.dcy.rpc.netty.ConsumerHandler.ConsumerInBoundHandler;
+import com.dcy.rpc.netty.ConsumerHandler.MsgToByteHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -43,9 +44,10 @@ public class ConsumerNettyStarter {
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
                         pipeline.addLast(new LoggingHandler(LogLevel.INFO));
-                        pipeline.addLast(new ObjectEncoder());
-                        pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
-                        pipeline.addLast(new ConsumerHandler());
+                        //pipeline.addLast(new ObjectEncoder());
+                        //pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
+                        pipeline.addLast(new MsgToByteHandler());
+                        pipeline.addLast(new ConsumerInBoundHandler());
                     }
                 });
     }

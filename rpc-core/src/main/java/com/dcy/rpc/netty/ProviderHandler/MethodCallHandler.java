@@ -39,8 +39,8 @@ public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtoc
         ResponseProtocol responseProtocol = ResponseProtocol.builder()
                 .requestId(requestProtocol.getRequestId())
                 .code((byte) 1)
-                .compressTypeId(requestProtocol.getCompressTypeId())
-                .serializeTypeId(requestProtocol.getSerializeTypeId())
+                .compressTypeId(requestProtocol.getCompressType())
+                .serializeTypeId(requestProtocol.getSerializeType())
                 .timeStamp(new Date().getTime())
                 .responseBody(returnValue)
                 .build();
