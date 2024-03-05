@@ -18,11 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CompressStrategy {
 
     private final static Map<CompressTypeEnum, Compress> COMPRESS_CACHE = new ConcurrentHashMap<>(8);
+    private final static Map<Byte, Compress> COMPRESS_ID_CACHE = new ConcurrentHashMap<>(8);
 
 
     static {
         Compress deflateCompressor = new DeflateCompressor();
         COMPRESS_CACHE.put(CompressTypeEnum.DEFLATE, deflateCompressor);
+        COMPRESS_ID_CACHE.put(CompressTypeEnum.DEFLATE.getCompressId(), deflateCompressor);
 
     }
 
@@ -34,7 +36,21 @@ public class CompressStrategy {
     public static Compress getCompress(CompressTypeEnum compressTypeEnum) {
         Compress compress = COMPRESS_CACHE.get(compressTypeEnum);
         if (compress == null) {
-            compress = COMPRESS_CACHE.get(CompressTypeEnum.DEFLATE.getCompressId());
+            compress = COMPRESS_CACHE.get(CompressTypeEnum.DEFLATE);
+            log.error("The configured compressor was not found, and the default will be used.");
+        }
+        return compress;
+    }
+
+    /**
+     * Get the compressor by compress id from the cache through the factory method
+     * @param compressTypeEnumId
+     * @return
+     */
+    public static Compress getCompressById(byte compressTypeEnumId) {
+        Compress compress = COMPRESS_ID_CACHE.get(compressTypeEnumId);
+        if (compress == null) {
+            compress = COMPRESS_ID_CACHE.get(CompressTypeEnum.DEFLATE.getCompressId());
             log.error("The configured compressor was not found, and the default will be used.");
         }
         return compress;

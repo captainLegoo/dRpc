@@ -17,10 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SerializeStrategy {
     private final static Map<SerializeTypeEnum, Serialize> SERIALIZER_CACHE = new ConcurrentHashMap<>(8);
+    private final static Map<Byte, Serialize> SERIALIZER_Id_CACHE = new ConcurrentHashMap<>(8);
 
     static {
         Serialize jdkSerializer = new JdkSerialize();
         SERIALIZER_CACHE.put(SerializeTypeEnum.JDK, jdkSerializer);
+        SERIALIZER_Id_CACHE.put(SerializeTypeEnum.JDK.getSerializeId(), jdkSerializer);
     }
 
     /**
@@ -36,4 +38,18 @@ public class SerializeStrategy {
         }
         return serialize;
     }
+    /**
+     * Get the serializer by id from the cache through the factory method
+     * @param serializeTypeEnumId
+     * @return
+     */
+    public static Serialize getSerializerById(byte serializeTypeEnumId) {
+        Serialize serialize = SERIALIZER_Id_CACHE.get(serializeTypeEnumId);
+        if (serialize == null) {
+            log.error("The configured serialization method was not found, and the default method will be used.");
+            serialize = SERIALIZER_Id_CACHE.get(SerializeTypeEnum.JDK.getSerializeId());
+        }
+        return serialize;
+    }
+
 }

@@ -22,8 +22,8 @@ import lombok.experimental.Accessors;
 public class ResponseProtocol {
     private long requestId;
     private byte code; // 1: success 2:error
-    private SerializeTypeEnum serializeTypeId;
-    private CompressTypeEnum compressTypeId;
+    private byte serializeTypeId;
+    private byte compressTypeId;
     private long timeStamp;
     private Object responseBody;
 }

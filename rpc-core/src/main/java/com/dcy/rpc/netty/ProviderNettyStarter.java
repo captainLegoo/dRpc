@@ -45,11 +45,11 @@ public class ProviderNettyStarter {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
                             pipeline.addLast(new LoggingHandler(LogLevel.INFO));
-                            pipeline.addLast(new ObjectEncoder());
-                            pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
+                            //pipeline.addLast(new ObjectEncoder());
+                            //pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
+                            pipeline.addLast(new ProviderOutboundHandler());
                             pipeline.addLast(new ProviderInboundHandler());
                             pipeline.addLast(new MethodCallHandler());
-                            pipeline.addLast(new ProviderOutboundHandler());
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();

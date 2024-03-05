@@ -24,10 +24,11 @@ import java.util.Objects;
 public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtocol> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RequestProtocol requestProtocol) throws Exception {
-        log.info("MethodCallHandler -> {}", requestProtocol);
-        RequestPayload requestPayload = requestProtocol.getRequestPayload();
+        log.debug("MethodCallHandler receive request，id is 【{}】", requestProtocol.getRequestId());
 
+        RequestPayload requestPayload = requestProtocol.getRequestPayload();
         ServiceConfig<?> serviceConfig = ProviderCache.SERVERS_LIST.get(requestPayload.getInterfaceName());
+
         if (Objects.isNull(serviceConfig)) {
             log.error("Service Not Found");
             return;
@@ -45,6 +46,7 @@ public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtoc
                 .responseBody(returnValue)
                 .build();
 
-        ctx.fireChannelRead(responseProtocol);
+        log.debug("Method call completed，id is 【{}】", requestProtocol.getRequestId());
+        ctx.writeAndFlush(responseProtocol);
     }
 }
