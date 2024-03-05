@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * 1B serialize
  * 1B compress
  * 8B requestId
+ * 8B time stamp
  * <p>
  * 0    1	 2	  3    4    5    6    7    8    9	 10	  11    12   13   14   15  16
  * +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
@@ -57,22 +58,24 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
         // request type
         byteBuf.writeByte(requestProtocol.getRequestType());
         // serialize
-        SerializeTypeEnum serializeType = requestProtocol.getSerializeType();
-        byteBuf.writeByte(serializeType.getSerializeId());
+        byte serializeType = requestProtocol.getSerializeType();
+        byteBuf.writeByte(serializeType);
         // compress
-        CompressTypeEnum compressType = requestProtocol.getCompressType();
-        byteBuf.writeByte(compressType.getCompressId());
+        byte compressType = requestProtocol.getCompressType();
+        byteBuf.writeByte(compressType);
         // requestId
         byteBuf.writeLong(requestProtocol.getRequestId());
+        // time stamp
+        byteBuf.writeLong(requestProtocol.getTimeStamp());
 
         RequestPayload requestPayload = requestProtocol.getRequestPayload();
 
         // serialize the payload
-        Serialize serializer = SerializeStrategy.getSerializer(serializeType);
+        Serialize serializer = SerializeStrategy.getSerializerById(serializeType);
         byte[] serializedPayload = serializer.serializer(requestPayload);
 
         // compress the payload
-        Compress compress = CompressStrategy.getCompress(compressType);
+        Compress compress = CompressStrategy.getCompressById(compressType);
         byte[] compressedPayload = compress.compress(serializedPayload);
 
         // request body
@@ -81,6 +84,7 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
         // when finished, clear the buffer
         ctx.writeAndFlush(byteBuf).addListener((ChannelFutureListener) channelFuture -> {
             if (channelFuture.isSuccess()) {
+                log.info("send request success");
                 byteBuf.clear();
             }
         });
