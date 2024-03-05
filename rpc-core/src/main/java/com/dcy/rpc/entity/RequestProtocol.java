@@ -22,8 +22,8 @@ import lombok.experimental.Accessors;
 public class RequestProtocol {
     private long requestId;
     private byte requestType;
-    private SerializeTypeEnum serializeType;
-    private CompressTypeEnum compressType;
+    private byte serializeType;
+    private byte compressType;
     private long timeStamp;
     private RequestPayload requestPayload;
 }
