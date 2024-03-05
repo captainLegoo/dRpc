@@ -1,20 +1,15 @@
 package com.dcy.rpc.netty.ProviderHandler;
 
-import com.dcy.rpc.cache.ProviderCache;
-import com.dcy.rpc.config.ServiceConfig;
+import com.dcy.rpc.compress.Compress;
 import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
-import com.dcy.rpc.entity.ResponseProtocol;
-import com.dcy.rpc.util.ProtostuffUtil;
+import com.dcy.rpc.serialize.Serialize;
+import com.dcy.rpc.strategy.CompressStrategy;
+import com.dcy.rpc.strategy.SerializeStrategy;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
-
-import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.Objects;
 
 /**
  * @author Kyle
@@ -23,11 +18,47 @@ import java.util.Objects;
  * Provider Message Decoder
  */
 @Slf4j
-public class ProviderInboundHandler extends SimpleChannelInboundHandler<Object> {
+public class ProviderInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        byte[] bytes = (byte[]) msg;
-        RequestProtocol requestProtocol = ProtostuffUtil.deserialize(bytes, RequestProtocol.class);
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
+        // magic
+        byte[] magicByte = new byte[4];
+        byteBuf.readBytes(magicByte);
+        String magicString = new String(magicByte);
+        // version
+        byte versionByte = byteBuf.readByte();
+        // request type
+        byte requestTypeByte = byteBuf.readByte();
+        // serialize type
+        byte serializeByte = byteBuf.readByte();
+        // compress type
+        byte compressByte = byteBuf.readByte();
+        // request id
+        long requestId = byteBuf.readLong();
+        // time stamp
+        long timeStamp = byteBuf.readLong();
+        // request payload
+        int bodyLength = byteBuf.writerIndex() - byteBuf.readerIndex();
+        byte[] bodyByte = new byte[bodyLength];
+        byteBuf.readBytes(bodyByte);
+        // unzip the payload
+        Compress compress = CompressStrategy.getCompressById(compressByte);
+        bodyByte = compress.decompress(bodyByte);
+        //  deserialize payload
+        Serialize serializer = SerializeStrategy.getSerializerById(serializeByte);
+        RequestPayload requestPayload = serializer.deserialize(bodyByte, RequestPayload.class);
+
+        RequestProtocol requestProtocol = RequestProtocol.builder()
+                .requestId(requestId)
+                .requestType(requestTypeByte)
+                .serializeType(serializeByte)
+                .compressType(compressByte)
+                .requestPayload(requestPayload)
+                .build();
+
+        log.debug("Provider receive request, id is 【{}】", requestId);
+
+        // pass next handler
         ctx.fireChannelRead(requestProtocol);
     }
 }
