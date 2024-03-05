@@ -7,10 +7,7 @@ import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
 import com.dcy.rpc.enumeration.RequestTypeEnum;
 import com.dcy.rpc.netty.ConsumerNettyStarter;
-import com.dcy.rpc.util.ProtostuffUtil;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -46,8 +43,8 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         RequestProtocol requestProtocol = new RequestProtocol()
                 .setRequestId(requestId)
                 .setRequestType(RequestTypeEnum.REQUEST.getId())
-                .setCompressType(globalConfig.getCompressType())
-                .setSerializeType(globalConfig.getSerializableType())
+                .setCompressType(globalConfig.getCompressType().getCompressId())
+                .setSerializeType(globalConfig.getSerializableType().getSerializeId())
                 .setTimeStamp(new Date().getTime())
                 .setRequestPayload(requestPayload);
 
@@ -61,20 +58,18 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         // 3.create CompletableFuture and add to cache, Waiting to receive return information
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
 
-        //
+        // TODO need to know if send successful and put completableFuture to cache
+        //channel.writeAndFlush(requestProtocol).addListener((ChannelFutureListener) channelFuture -> {
+        //    if (!channelFuture.isSuccess()) {
+        //        log.info("Id:【{}】 send message failed", requestId);
+        //    } else {
+        //        log.info("Id:【{}】 send message success", requestId);
+        //        ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
+        //    }
+        //});
 
-        //
-        channel.writeAndFlush(requestProtocol).addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                if (!channelFuture.isSuccess()) {
-                    log.info("Id:【{}】 send message failed", requestId);
-                } else {
-                    log.info("Id:【{}】 send message success", requestId);
-                    ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
-                }
-            }
-        });
+        channel.writeAndFlush(requestProtocol);
+        ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
 
         // 4.get response result
         return completableFuture.get(5, TimeUnit.SECONDS);
