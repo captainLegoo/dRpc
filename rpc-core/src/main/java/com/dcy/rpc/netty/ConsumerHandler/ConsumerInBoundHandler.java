@@ -1,8 +1,11 @@
 package com.dcy.rpc.netty.ConsumerHandler;
 
 import com.dcy.rpc.cache.ConsumerCache;
-import com.dcy.rpc.entity.ResponseProtocol;
-import com.dcy.rpc.util.ProtostuffUtil;
+import com.dcy.rpc.compress.Compress;
+import com.dcy.rpc.serialize.Serialize;
+import com.dcy.rpc.strategy.CompressStrategy;
+import com.dcy.rpc.strategy.SerializeStrategy;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -14,19 +17,39 @@ import java.util.concurrent.CompletableFuture;
  * @date 2024/02/24
  */
 @Slf4j
-public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<Object> {
+public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        byte[] bytes = (byte[]) msg;
-        ResponseProtocol responseProtocol = ProtostuffUtil.deserialize(bytes, ResponseProtocol.class);
-        // get request id
-        long requestId = responseProtocol.getRequestId();
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
+        // request id
+        long requestId = byteBuf.readLong();
+        log.debug("ConsumerInBoundHandler receive response, id is 【{}】", requestId);
+        // response code
+        byte code = byteBuf.readByte();
+        // serialize Type Id
+        byte serializeTypeId = byteBuf.readByte();
+        // compress Type Id
+        byte compressTypeId = byteBuf.readByte();
+        // time stamp
+        long timeStamp = byteBuf.readLong();
+        // response body
+        int responseBodyLength = byteBuf.writerIndex() - byteBuf.readerIndex();
+        byte[] responseBodyByte = new byte[responseBodyLength];
+        byteBuf.readBytes(responseBodyByte);
+
+        // decompress the response body
+        Compress compress = CompressStrategy.getCompressById(compressTypeId);
+        responseBodyByte = compress.decompress(responseBodyByte);
+
+        // deserialize the response body
+        Serialize serializer = SerializeStrategy.getSerializerById(serializeTypeId);
+        Object responseBody = serializer.deserialize(responseBodyByte, Object.class);
+
         // get completableFuture from cache
         CompletableFuture<Object> completableFuture = ConsumerCache.FUTURES_NAP.get(requestId);
         // 1==success
-        if (responseProtocol.getCode() == 1) {
+        if (code == 1) {
             log.info("Id:【{}】 get the remote calling result.", requestId);
-            completableFuture.complete(responseProtocol.getResponseBody());
+            completableFuture.complete(responseBody);
         } else {
             completableFuture.complete(null);
         }
