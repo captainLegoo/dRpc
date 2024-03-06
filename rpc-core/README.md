@@ -24,3 +24,18 @@
 - Provider send result
 - Consumer receive msg
 
+6.Write serializer
+
+- JDK
+
+7.Write compressor
+
+- deflate
+
+8.Unpacking and pasting data
+
+- writing protocol
+- modify consumer Out Bound Handler
+- modify consumer In Bound Handler
+- modify provider Out Bound Handler
+- modify consumer In Bound Handler
