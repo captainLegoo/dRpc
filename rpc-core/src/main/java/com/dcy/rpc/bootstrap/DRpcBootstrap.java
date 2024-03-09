@@ -7,9 +7,13 @@ import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.config.ServiceConfig;
 import com.dcy.rpc.enumeration.CompressTypeEnum;
+import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
+import com.dcy.rpc.factory.RegistryFactory;
 import com.dcy.rpc.netty.ProviderNettyStarter;
 import com.dcy.rpc.proxy.ProxyConfig;
+import com.dcy.rpc.registry.Registry;
+import com.dcy.rpc.util.GetHostAddress;
 import com.dcy.rpc.util.ScanPackage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +45,7 @@ import java.util.stream.Collectors;
 public class DRpcBootstrap {
     private static volatile DRpcBootstrap instance;
     private static final GlobalConfig globalConfig = new GlobalConfig();
+    private static Registry registry;
 
     private DRpcBootstrap() {
         if (instance != null) {
@@ -77,11 +82,16 @@ public class DRpcBootstrap {
 
     /**
      * registry
-     *
-     * @param registryConfig
+     * @param registryCenterEnum
+     * @param host
+     * @param port
      * @return
      */
-    public DRpcBootstrap registry(RegistryConfig registryConfig) {
+    public DRpcBootstrap registry(RegistryCenterEnum registryCenterEnum, String host, int port) {
+        RegistryConfig registryConfig = new RegistryConfig(registryCenterEnum, host, port);
+        globalConfig.setRegistryConfig(registryConfig);
+        // connect to registry
+        registry = RegistryFactory.getRegistry(getGlobalConfig().getRegistryConfig());
         return this;
     }
 
@@ -202,16 +212,18 @@ public class DRpcBootstrap {
 
     /**
      * publish service to registration center
-     *
      * @param serviceConfig
      * @return
      */
-    private boolean publish(ServiceConfig serviceConfig) {
+    private boolean publish(ServiceConfig<?> serviceConfig) {
         // 1.Registering services as nodes in the registry
         //boolean isRegister = globalConfig.getRegistryCenter().registerService(serviceConfig, globalConfig.getPort());
+        String localIPAddress = GetHostAddress.getLocalIPAddress();
+        log.debug("localIPAddress: {}", localIPAddress);
+        boolean isPublish = registry.register(serviceConfig.getInterfaceRef().getName(), localIPAddress, globalConfig.getPort());
 
         // 2.If registration is successful, the service is cached locally
-        if (true) {
+        if (isPublish) {
             ProviderCache.SERVERS_LIST.put(serviceConfig.getInterfaceRef().getName(), serviceConfig);
             return true;
         }
