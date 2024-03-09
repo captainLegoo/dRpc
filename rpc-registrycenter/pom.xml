@@ -40,6 +40,12 @@
             <artifactId>junit-jupiter-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.dcy.rpc</groupId>
+            <artifactId>rpc-interface</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
 </project>
