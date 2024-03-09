@@ -26,6 +26,26 @@ HandsOn-RPC-framework
 
 
 
+# Zookeeper Node
+
+```
+rpc-metadata
+ L providers
+ 	L service (Interface name)
+ 		L node1 [data]	(Node name：ip:port) (Data: related feature data/configuration, etc.)
+ 		L node2 [data]
+ 		L node3 [data]
+ L consumers
+ 	L service
+ 		L node1 [data]
+ 		L node2 [data]
+ 		L node3 [data]
+ L config
+.........
+```
+
+
+
 
 
 # **Non-Spring project configuration**
