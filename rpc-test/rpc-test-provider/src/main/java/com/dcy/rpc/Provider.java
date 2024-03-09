@@ -1,6 +1,7 @@
 package com.dcy.rpc;
 
 import com.dcy.rpc.bootstrap.DRpcBootstrap;
+import com.dcy.rpc.enumeration.RegistryCenterEnum;
 
 /**
  * @author Kyle
@@ -11,7 +12,7 @@ public class Provider {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-Provider")
                 .port(9000)
-                //.registry()
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.30.74", 2181)
                 .scanAndPublish("com.dcy.rpc.service.impl")
                 .start();
     }
