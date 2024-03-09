@@ -1,5 +1,6 @@
 package com.dcy.rpc.compress;
 
+import com.dcy.rpc.exception.CompressException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;

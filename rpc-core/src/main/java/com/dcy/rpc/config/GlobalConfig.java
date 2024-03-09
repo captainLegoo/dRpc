@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class GlobalConfig {
     private String bootstrapName;
     private int port;
+    private RegistryConfig registryConfig;
     private SerializeTypeEnum serializableType;
     private CompressTypeEnum compressType;
     private final IdGenerator idGenerator = new IdGenerator(1,2);

@@ -53,7 +53,7 @@ public class ProviderNettyStarter {
                         }
                     });
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
-            log.info("service provider start");
+            log.info("service provider started successfully");
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();

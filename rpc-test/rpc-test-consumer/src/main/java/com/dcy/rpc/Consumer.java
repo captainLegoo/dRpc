@@ -14,7 +14,7 @@ public class Consumer {
     public static void main(String[] args) throws InterruptedException {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-consumer")
-                .registry(null)
+                //.registry(null)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE);
                 //.reference("com.dcy.rpc.service.impl");
