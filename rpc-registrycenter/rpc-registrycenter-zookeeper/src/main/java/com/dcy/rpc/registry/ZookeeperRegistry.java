@@ -7,6 +7,8 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.data.Stat;
 
 /**
  * @author Kyle
@@ -31,19 +33,35 @@ public class ZookeeperRegistry implements Registry{
         String servicePath = ConnectConstant.NODE_DEFAULT_PATH + "/" + serviceName;
         String ipAddressPath = servicePath + "/" + localIPAddress + ":" + port;
         try {
-            // create service path
-            client.create()
-                    .creatingParentsIfNeeded()
-                    .withMode(CreateMode.PERSISTENT)
-                    .forPath(servicePath);
+            // Check if service path exists
+            Stat servicePathStat = client.checkExists().forPath(servicePath);
+            if (servicePathStat == null) {
+                // If service path does not exist, create it
+                client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.PERSISTENT)
+                        .forPath(servicePath);
+            }
 
-            // create ip of service path
-            String finalPath = client.create()
-                    .creatingParentsIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL)
-                    .forPath(ipAddressPath);
 
-            return finalPath.equals(ipAddressPath);
+            // Check if ip of service path exists
+            Stat ipAddressPathStat = client.checkExists().forPath(ipAddressPath);
+            if (ipAddressPathStat == null) {
+                // If ip of service path does not exist, create it
+                String finalPath = client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.EPHEMERAL)
+                        .forPath(ipAddressPath);
+
+                return finalPath.equals(ipAddressPath);
+            } else {
+                // If ip of service path already exists, handle accordingly
+                log.warn("IP address path {} already exists", ipAddressPath);
+                return false; // Or handle as per your business logic
+            }
+
+        } catch (KeeperException.NodeExistsException e) {
+            log.warn("Node {} already exists", e.getPath());
         } catch (Exception e) {
             log.error("Failed to register service", e);
         }
@@ -55,7 +73,7 @@ public class ZookeeperRegistry implements Registry{
         try {
             RetryPolicy retryPolicy = new ExponentialBackoffRetry(3000, 10);
 
-            CuratorFramework client2 = CuratorFrameworkFactory.builder()
+            CuratorFramework client = CuratorFrameworkFactory.builder()
                     .connectString(address + ":" + host)
                     .sessionTimeoutMs(60 * 1000)
                     .connectionTimeoutMs(15 * 1000)
@@ -65,8 +83,8 @@ public class ZookeeperRegistry implements Registry{
 
             createDefaultNode();
 
-            client2.start();
-            return client2;
+            client.start();
+            return client;
         } catch (Exception e) {
             log.error("Failed to connect to zookeeper", e);
         }
@@ -76,12 +94,16 @@ public class ZookeeperRegistry implements Registry{
 
     private void createDefaultNode() {
         try {
-            String path = client.create()
-                    .creatingParentsIfNeeded()
-                    .withMode(CreateMode.PERSISTENT)
-                    .forPath(ConnectConstant.NODE_DEFAULT_PATH);
+            if (client != null) { // 避免空指针异常
+                String path = client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.PERSISTENT)
+                        .forPath(ConnectConstant.NODE_DEFAULT_PATH);
 
-            log.debug("Create default node: {}", path);
+                log.debug("Create default node: {}", path);
+            } else {
+                log.error("CuratorFramework client is null. Failed to create default node.");
+            }
         } catch (Exception e) {
             log.error("Failed to create default node", e);
         }
