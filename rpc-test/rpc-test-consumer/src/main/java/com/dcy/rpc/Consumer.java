@@ -2,6 +2,7 @@ package com.dcy.rpc;
 
 import com.dcy.rpc.bootstrap.DRpcBootstrap;
 import com.dcy.rpc.enumeration.CompressTypeEnum;
+import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.service.BookService;
 import com.dcy.rpc.service.impl.BookServiceImpl;
@@ -14,7 +15,7 @@ public class Consumer {
     public static void main(String[] args) throws InterruptedException {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-consumer")
-                //.registry(null)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.30.74", 2181)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE);
                 //.reference("com.dcy.rpc.service.impl");
