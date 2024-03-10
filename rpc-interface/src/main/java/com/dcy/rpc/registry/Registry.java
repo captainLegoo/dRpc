@@ -8,4 +8,5 @@ package com.dcy.rpc.registry;
  */
 public interface Registry {
     boolean register(String serviceName, String localIPAddress, int port);
+    String lookupAddress(String serviceName);
 }

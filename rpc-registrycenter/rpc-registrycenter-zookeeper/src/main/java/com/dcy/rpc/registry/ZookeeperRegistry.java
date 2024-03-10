@@ -10,6 +10,8 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
 
+import java.util.List;
+
 /**
  * @author Kyle
  * @date 2024/03/09
@@ -66,6 +68,19 @@ public class ZookeeperRegistry implements Registry{
             log.error("Failed to register service", e);
         }
         return false;
+    }
+
+    @Override
+    public String lookupAddress(String serviceName) {
+        String servicePath = ConnectConstant.NODE_DEFAULT_PATH + "/" + serviceName;
+        try {
+            List<String> pathList = client.getChildren().forPath(servicePath);
+            return pathList.get(0);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private CuratorFramework connectZookeeper(String address, int host) {
