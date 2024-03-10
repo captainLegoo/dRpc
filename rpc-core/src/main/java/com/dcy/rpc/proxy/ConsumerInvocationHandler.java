@@ -7,11 +7,13 @@ import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
 import com.dcy.rpc.enumeration.RequestTypeEnum;
 import com.dcy.rpc.netty.ConsumerNettyStarter;
+import com.dcy.rpc.registry.Registry;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -51,9 +53,14 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         // TODO get address from registry center
         // 2.netty connection
         // 2.1.get address from registry center
+        Registry registry = globalConfig.getRegistry();
+        String path = registry.lookupAddress(interfaceRef.getName());
+        String host = path.substring(0, path.indexOf(":"));
+        int port = Integer.parseInt(path.substring(path.indexOf(":") + 1));
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(host, port);
 
         // 2.2.get available channel
-        Channel channel = ConsumerNettyStarter.getNettyChannel("127.0.0.1", 9000);
+        Channel channel = ConsumerNettyStarter.getNettyChannel(inetSocketAddress);
 
         // 3.create CompletableFuture and add to cache, Waiting to receive return information
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
