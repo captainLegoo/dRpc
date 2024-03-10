@@ -92,6 +92,9 @@ public class DRpcBootstrap {
         globalConfig.setRegistryConfig(registryConfig);
         // connect to registry
         registry = RegistryFactory.getRegistry(getGlobalConfig().getRegistryConfig());
+        if (registry != null) {
+            globalConfig.setRegistry(registry);
+        }
         return this;
     }
 
