@@ -45,7 +45,6 @@ public class ZookeeperRegistry implements Registry{
                         .forPath(servicePath);
             }
 
-
             // Check if ip of service path exists
             Stat ipAddressPathStat = client.checkExists().forPath(ipAddressPath);
             if (ipAddressPathStat == null) {
@@ -96,9 +95,9 @@ public class ZookeeperRegistry implements Registry{
                     .namespace(ConnectConstant.NAMESPACE)
                     .build();
 
+            client.start();
             createDefaultNode();
 
-            client.start();
             return client;
         } catch (Exception e) {
             log.error("Failed to connect to zookeeper", e);
@@ -109,7 +108,7 @@ public class ZookeeperRegistry implements Registry{
 
     private void createDefaultNode() {
         try {
-            if (client != null) { // 避免空指针异常
+            if (client != null) {
                 String path = client.create()
                         .creatingParentsIfNeeded()
                         .withMode(CreateMode.PERSISTENT)

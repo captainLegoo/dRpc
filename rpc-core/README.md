@@ -39,3 +39,10 @@
 - modify consumer In Bound Handler
 - modify provider Out Bound Handler
 - modify consumer In Bound Handler
+
+9.Implement registration center - zookeeper
+
+- Code of which provider to publish services to the registry
+- Code of which consumer can lookup a address from registry
+
+10. Load balancing strategy
