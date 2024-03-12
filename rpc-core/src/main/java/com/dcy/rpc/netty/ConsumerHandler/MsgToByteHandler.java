@@ -4,13 +4,10 @@ import com.dcy.rpc.compress.Compress;
 import com.dcy.rpc.constant.MessageFormatConstant;
 import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
-import com.dcy.rpc.enumeration.CompressTypeEnum;
-import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.serialize.Serialize;
 import com.dcy.rpc.strategy.CompressStrategy;
 import com.dcy.rpc.strategy.SerializeStrategy;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -83,8 +80,11 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
 
         // when finished, clear the buffer
         ctx.writeAndFlush(byteBuf).addListener((ChannelFutureListener) channelFuture -> {
-            if (channelFuture.isSuccess()) {
-                log.info("send request success");
+            long requestId = requestProtocol.getRequestId();
+            if (!channelFuture.isSuccess()) {
+                log.info("Id:【{}】 send message failed", requestId);
+            } else {
+                log.info("Id:【{}】 send message success", requestId);
                 byteBuf.clear();
             }
         });

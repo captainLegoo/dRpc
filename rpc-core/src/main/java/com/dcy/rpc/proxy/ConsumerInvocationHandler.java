@@ -65,16 +65,6 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         // 3.create CompletableFuture and add to cache, Waiting to receive return information
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
 
-        // TODO need to know if send successful and put completableFuture to cache
-        //channel.writeAndFlush(requestProtocol).addListener((ChannelFutureListener) channelFuture -> {
-        //    if (!channelFuture.isSuccess()) {
-        //        log.info("Id:【{}】 send message failed", requestId);
-        //    } else {
-        //        log.info("Id:【{}】 send message success", requestId);
-        //        ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
-        //    }
-        //});
-
         channel.writeAndFlush(requestProtocol);
         ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
 
