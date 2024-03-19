@@ -1,6 +1,7 @@
 package com.dcy.rpc.config;
 
 import com.dcy.rpc.enumeration.CompressTypeEnum;
+import com.dcy.rpc.enumeration.LoadbalancerTypeEnum;
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.registry.Registry;
 import com.dcy.rpc.util.IdGenerator;
@@ -22,5 +23,6 @@ public class GlobalConfig {
     private Registry registry;
     private SerializeTypeEnum serializableType;
     private CompressTypeEnum compressType;
+    private LoadbalancerTypeEnum loadbalancerTypeEnum;
     private final IdGenerator idGenerator = new IdGenerator(1,2);
 }

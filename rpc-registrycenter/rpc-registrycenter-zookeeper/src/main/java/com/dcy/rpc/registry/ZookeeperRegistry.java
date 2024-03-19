@@ -10,16 +10,18 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
 
+import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Kyle
  * @date 2024/03/09
- *
+ * <p>
  * connect and publish service in zookeeper
  */
 @Slf4j
-public class ZookeeperRegistry implements Registry{
+public class ZookeeperRegistry implements Registry {
     private final CuratorFramework client;
     private String address;
     private int host;
@@ -75,7 +77,31 @@ public class ZookeeperRegistry implements Registry{
         try {
             List<String> pathList = client.getChildren().forPath(servicePath);
             return pathList.get(0);
-        }catch (Exception e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<InetSocketAddress> lookupAllAddress(String serviceName) {
+        String servicePath = ConnectConstant.NODE_DEFAULT_PATH + "/" + serviceName;
+        try {
+            // get all address from zookeeper and convert to inetSocketAddress list
+            List<InetSocketAddress> inetSocketAddressList = client
+                    .getChildren()
+                    .forPath(servicePath)
+                    .stream()
+                    .map(address -> {
+                        String host = address.substring(0, address.indexOf(":"));
+                        int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
+                        return new InetSocketAddress(host, port);
+                    })
+                    .collect(Collectors.toList());
+
+            return inetSocketAddressList;
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

@@ -48,7 +48,7 @@ public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<ByteBuf>
         CompletableFuture<Object> completableFuture = ConsumerCache.FUTURES_NAP.get(requestId);
         // 1==success
         if (code == 1) {
-            log.info("Id:【{}】 get the remote calling result.", requestId);
+            log.debug("Id:【{}】 get the remote calling result successfully.", requestId);
             completableFuture.complete(responseBody);
         } else {
             completableFuture.complete(null);
