@@ -1,5 +1,8 @@
 package com.dcy.rpc.registry;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+
 /**
  * @author Kyle
  * @date 2024/03/09
@@ -17,9 +20,16 @@ public interface Registry {
     boolean register(String serviceName, String localIPAddress, int port);
 
     /**
-     * Lookup
+     * Lookup an address
      * @param serviceName
      * @return
      */
     String lookupAddress(String serviceName);
+
+    /**
+     * Lookup all address
+     * @param serviceName
+     * @return
+     */
+    List<InetSocketAddress> lookupAllAddress(String serviceName);
 }
