@@ -2,7 +2,7 @@ package com.dcy.rpc.strategy;
 
 import com.dcy.rpc.enumeration.LoadbalancerTypeEnum;
 import com.dcy.rpc.loadbalancer.Loadbalancer;
-import com.dcy.rpc.loadbalancer.impl.RoundLoadbalancer;
+import com.dcy.rpc.loadbalancer.impl.RoundRobinLoadbalancer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -21,7 +21,7 @@ public class LoadbalancerStrategy {
 
 
     static {
-        LOADBALANCER_MAP.put(LoadbalancerTypeEnum.ROUND_ROBIN, new RoundLoadbalancer());
+        LOADBALANCER_MAP.put(LoadbalancerTypeEnum.ROUND_ROBIN, new RoundRobinLoadbalancer());
     }
 
     /**
@@ -30,6 +30,6 @@ public class LoadbalancerStrategy {
      * @return
      */
     public static Loadbalancer getLoadbalancer(LoadbalancerTypeEnum loadbalancerTypeEnum) {
-        return LOADBALANCER_MAP.getOrDefault(loadbalancerTypeEnum, new RoundLoadbalancer());
+        return LOADBALANCER_MAP.getOrDefault(loadbalancerTypeEnum, new RoundRobinLoadbalancer());
     }
 }
