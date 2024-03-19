@@ -77,7 +77,7 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
      */
     private InetSocketAddress getAvailableAddress(GlobalConfig globalConfig) {
         // get loadbalancer from cache
-        Loadbalancer loadbalancer = ConsumerCache.LOADBALANCER_MAP.get(globalConfig.getLoadbalancerTypeEnum());
+        Loadbalancer loadbalancer = ConsumerCache.LOADBALANCER_MAP.get(interfaceRef.getName());
         if (Objects.nonNull(loadbalancer)) {
             return loadbalancer.selectServiceAddress();
         }
@@ -85,6 +85,8 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         // create loadbalancer
         List<InetSocketAddress> inetSocketAddressList = globalConfig.getRegistry().lookupAllAddress(interfaceRef.getName());
         loadbalancer = LoadbalancerStrategy.getLoadbalancer(globalConfig.getLoadbalancerTypeEnum());
+        // put loadbalancer to cache
+        ConsumerCache.LOADBALANCER_MAP.put(interfaceRef.getName(), loadbalancer);
         return loadbalancer.selectServiceAddress(inetSocketAddressList);
     }
 }
