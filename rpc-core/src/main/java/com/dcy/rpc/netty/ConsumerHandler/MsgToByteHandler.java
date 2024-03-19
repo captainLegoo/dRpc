@@ -47,7 +47,7 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, RequestProtocol requestProtocol, ByteBuf byteBuf) throws Exception {
-        log.info("requestProtocol -> {}", requestProtocol);
+        log.debug("requestProtocol -> {}", requestProtocol);
         // magic
         byteBuf.writeBytes(MessageFormatConstant.MAGIC);
         // version
@@ -82,9 +82,9 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
         ctx.writeAndFlush(byteBuf).addListener((ChannelFutureListener) channelFuture -> {
             long requestId = requestProtocol.getRequestId();
             if (!channelFuture.isSuccess()) {
-                log.info("Id:【{}】 send message failed", requestId);
+                log.debug("Id:【{}】 send message failed", requestId);
             } else {
-                log.info("Id:【{}】 send message success", requestId);
+                log.debug("Id:【{}】 send message success", requestId);
                 byteBuf.clear();
             }
         });
