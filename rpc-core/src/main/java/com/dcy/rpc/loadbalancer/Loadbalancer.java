@@ -14,9 +14,17 @@ import java.util.List;
 public interface Loadbalancer {
 
     /**
-     * Select an available service address
+     * select service address from cache
+     * @return
+     */
+    InetSocketAddress selectServiceAddress();
+
+    /**
+     * select service address <p>
+     * - create loadbalancer first time <p>
+     * - reloadbalancer when lookupAddressList change
      * @param lookupAddressList
      * @return
      */
-    InetSocketAddress selectServiceAddress(List<InetSocketAddress>... lookupAddressList);
+    InetSocketAddress selectServiceAddress(List<InetSocketAddress> lookupAddressList);
 }
