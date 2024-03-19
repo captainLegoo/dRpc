@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Kyle
  * @date 2023/10/4 11:29
  * <p>
- * Compression factory method class
+ * Compression Strategy method class
  */
 @Slf4j
 public class CompressStrategy {
