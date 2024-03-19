@@ -39,3 +39,4 @@ third-party/nacos/data/
 third-party/nacos/work/
 
 file/
+/out/
