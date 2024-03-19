@@ -45,4 +45,8 @@
 - Code of which provider to publish services to the registry
 - Code of which consumer can lookup a address from registry
 
-10. Load balancing strategy
+10. Load balancer
+
+- create strategy method for load balancer
+- create load balancer
+  - round robin
