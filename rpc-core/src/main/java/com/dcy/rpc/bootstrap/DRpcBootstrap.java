@@ -7,6 +7,7 @@ import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.config.ServiceConfig;
 import com.dcy.rpc.enumeration.CompressTypeEnum;
+import com.dcy.rpc.enumeration.LoadbalancerTypeEnum;
 import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.factory.RegistryFactory;
@@ -109,6 +110,11 @@ public class DRpcBootstrap {
 
     public DRpcBootstrap compress(CompressTypeEnum compressTypeEnum) {
         globalConfig.setCompressType(compressTypeEnum);
+        return this;
+    }
+
+    public DRpcBootstrap loadbalancer(LoadbalancerTypeEnum loadbalancerTypeEnum) {
+        globalConfig.setLoadbalancerTypeEnum(loadbalancerTypeEnum);
         return this;
     }
 

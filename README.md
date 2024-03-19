@@ -55,13 +55,15 @@ rpc-metadata
 - name (optional)
 - serializer
 - compressor
+- load balancer
 
 ```java
 DRpcBootstrap.getInstance()
     .setBootstrapName("RPC-consumer")
     .registry(null)
     .serialize(SerializeTypeEnum.JDK)
-    .compress(CompressTypeEnum.DEFLATE);
+    .compress(CompressTypeEnum.DEFLATE)
+    .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
 
 BookService bookService = new BookServiceImpl();
 bookService.writeReaderName();
@@ -97,10 +99,11 @@ public class BookServiceImpl implements BookService {
 
 ```java
 DRpcBootstrap.getInstance()
-    .setBootstrapName("RPC-Provider")
-    .port(9000)
-    .scanAndPublish("com.dcy.rpc.service.impl")
-    .start();
+                .setBootstrapName("RPC-Provider")
+                .port(9000)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.30.74", 2181)
+                .scanAndPublish("com.dcy.rpc.service.impl")
+                .start();
 ```
 
 

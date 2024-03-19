@@ -1,6 +1,7 @@
 package com.dcy.rpc.cache;
 
-import java.util.HashMap;
+import com.dcy.rpc.loadbalancer.Loadbalancer;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,4 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConsumerCache {
     // Caching of request id and CompletableFuture
     public static final Map<Long, CompletableFuture<Object>> FUTURES_NAP = new ConcurrentHashMap<>(16);
+
+    // Caching of service name and load balancing
+    public static final Map<String, Loadbalancer> LOADBALANCER_MAP = new ConcurrentHashMap<>(16);
 }

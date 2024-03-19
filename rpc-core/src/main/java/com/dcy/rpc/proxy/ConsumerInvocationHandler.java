@@ -6,8 +6,9 @@ import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
 import com.dcy.rpc.enumeration.RequestTypeEnum;
+import com.dcy.rpc.loadbalancer.Loadbalancer;
 import com.dcy.rpc.netty.ConsumerNettyStarter;
-import com.dcy.rpc.registry.Registry;
+import com.dcy.rpc.strategy.LoadbalancerStrategy;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -50,14 +53,9 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
                 .setTimeStamp(new Date().getTime())
                 .setRequestPayload(requestPayload);
 
-        // TODO get address from registry center
-        // 2.netty connection
-        // 2.1.get address from registry center
-        Registry registry = globalConfig.getRegistry();
-        String path = registry.lookupAddress(interfaceRef.getName());
-        String host = path.substring(0, path.indexOf(":"));
-        int port = Integer.parseInt(path.substring(path.indexOf(":") + 1));
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(host, port);
+        // 2.get channel by address
+        // 2.1.get available address from registry center and loadbalancer
+        InetSocketAddress inetSocketAddress = getAvailableAddress(globalConfig);
 
         // 2.2.get available channel
         Channel channel = ConsumerNettyStarter.getNettyChannel(inetSocketAddress);
@@ -70,5 +68,23 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
 
         // 4.get response result
         return completableFuture.get(5, TimeUnit.SECONDS);
+    }
+
+    /**
+     * get available address
+     * @param globalConfig
+     * @return
+     */
+    private InetSocketAddress getAvailableAddress(GlobalConfig globalConfig) {
+        // get loadbalancer from cache
+        Loadbalancer loadbalancer = ConsumerCache.LOADBALANCER_MAP.get(globalConfig.getLoadbalancerTypeEnum());
+        if (Objects.nonNull(loadbalancer)) {
+            return loadbalancer.selectServiceAddress();
+        }
+
+        // create loadbalancer
+        List<InetSocketAddress> inetSocketAddressList = globalConfig.getRegistry().lookupAllAddress(interfaceRef.getName());
+        loadbalancer = LoadbalancerStrategy.getLoadbalancer(globalConfig.getLoadbalancerTypeEnum());
+        return loadbalancer.selectServiceAddress(inetSocketAddressList);
     }
 }
