@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: rpc-test-spring-consumer
+server:
+  port: 9001
