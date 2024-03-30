@@ -13,6 +13,6 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
     @Override
     public String sayHello(String name) {
-        return "Hello spring rpc provider";
+        return "Rpc-Provider say Hello to: " + name;
     }
 }
