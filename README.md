@@ -60,7 +60,7 @@ rpc-metadata
 ```java
 DRpcBootstrap.getInstance()
     .setBootstrapName("RPC-consumer")
-    .registry(null)
+    .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
     .serialize(SerializeTypeEnum.JDK)
     .compress(CompressTypeEnum.DEFLATE)
     .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
