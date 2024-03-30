@@ -6,13 +6,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Kyle
- * @date 2024/03/26
+ * @date 2024/03/30
  */
 @RestController
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/account")
+public class AccountController {
     @GetMapping
-    public String user() {
-        return "user";
+    public String login() {
+        return "login successful";
     }
 }

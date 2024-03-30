@@ -2,4 +2,4 @@ spring:
   application:
     name: rpc-test-spring-provider
 server:
-  port: 9000
+  port: 9100

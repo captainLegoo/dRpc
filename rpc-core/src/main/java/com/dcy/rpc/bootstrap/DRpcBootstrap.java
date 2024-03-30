@@ -120,7 +120,7 @@ public class DRpcBootstrap {
 
     /**
      * Create a proxy object based on the package path and specific variables
-     * TODO: In non-Spring environments, modifying properties through reflection will fail.
+     * TODO: In non-Spring environments, modifying properties through reflection will fail, also in Spring project, inject fail
      * @param packageName
      * @return
      */

@@ -53,6 +53,7 @@ rpc-metadata
 **Consumer**
 
 - name (optional)
+- registry - middleware / Ip address / port
 - serializer
 - compressor
 - load balancer
@@ -60,7 +61,7 @@ rpc-metadata
 ```java
 DRpcBootstrap.getInstance()
     .setBootstrapName("RPC-consumer")
-    .registry(null)
+    .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
     .serialize(SerializeTypeEnum.JDK)
     .compress(CompressTypeEnum.DEFLATE)
     .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
@@ -85,8 +86,6 @@ public class BookServiceImpl implements BookService {
     }
 }
 ```
-
-
 
 
 
@@ -118,5 +117,94 @@ public class UserServiceImpl implements UserService {
         return "hello " + stuName + ". How are you?";
     }
 }
+```
+
+
+
+# Spring project configuration
+
+**Consumer**
+
+Configure the default startup as a bean
+
+```java
+@Configuration
+public class RpcConfig {
+    @Bean
+    public DRpcBootstrap rpcConsumerConfig() {
+        DRpcBootstrap.getInstance()
+                .setBootstrapName("RPC-consumer")
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
+                .serialize(SerializeTypeEnum.JDK)
+                .compress(CompressTypeEnum.DEFLATE)
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+
+        return DRpcBootstrap.getInstance();
+    }
+}
+```
+
+
+
+Consumer Test
+
+- create a proxy object for consumer service that needing
+
+```java
+private final UserService userService = new ProxyConfig<>(UserService.class).get();
+```
+
+```java
+@RestController
+@RequestMapping("/payment")
+public class PaymentController {
+
+    private final UserService userService = new ProxyConfig<>(UserService.class).get();
+
+    @GetMapping
+    public String payment() {
+        return userService.sayHello("Kyle");
+    }
+}
+```
+
+
+
+
+
+**Provider**
+
+Configure the default startup as a bean
+
+```java
+@Configuration
+public class RpcConfig {
+    @Bean
+    public DRpcBootstrap rpcProviderConfig() {
+        DRpcBootstrap.getInstance()
+                .setBootstrapName("RPC-Provider")
+                .port(9600)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
+                .scanAndPublish("com.dcy.service.impl")
+                .start();
+        return DRpcBootstrap.getInstance();
+    }
+}
+```
+
+
+
+Use `@RpcService` to publish services to the registration center
+
+```java
+@Service
+@RpcService
+public class UserServiceImpl implements UserService {
+    @Override
+    public String sayHello(String name) {
+        return "Rpc-Provider say Hello to: " + name;
+    }
+}
+
 ```
 
