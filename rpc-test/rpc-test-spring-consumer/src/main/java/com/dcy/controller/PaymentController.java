@@ -1,8 +1,9 @@
 package com.dcy.controller;
 
 import com.dcy.rpc.UserService;
-import com.dcy.rpc.proxy.ProxyConfig;
+import com.dcy.rpc.annotation.RpcReference;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/payment")
 public class PaymentController {
 
-    private final UserService userService = new ProxyConfig<>(UserService.class).get();
+    //private final UserService userService = new ProxyConfig<>(UserService.class).get();
+    @RpcReference
+    private UserService userService;
 
-    @GetMapping
-    public String payment() {
-        return userService.sayHello("Kyle");
+    @GetMapping("/{accountName}")
+    public String payment(@PathVariable String accountName) {
+        return userService.sayHello(accountName);
     }
 }

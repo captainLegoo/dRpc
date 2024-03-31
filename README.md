@@ -50,7 +50,7 @@ rpc-metadata
 
 # **Non-Spring project configuration**
 
-**Consumer**
+## **Consumer**
 
 - name (optional)
 - registry - middleware / Ip address / port
@@ -89,7 +89,7 @@ public class BookServiceImpl implements BookService {
 
 
 
-**Provider**
+## **Provider**
 
 - name (optional)
 - port
@@ -123,13 +123,17 @@ public class UserServiceImpl implements UserService {
 
 # Spring project configuration
 
-**Consumer**
+## **Consumer**
 
-Configure the default startup as a bean
+- Configure the default startup as a bean
+- Implements `BeanPostProcessor`
+  - Override `postProcessAfterInitialization`
 
 ```java
 @Configuration
-public class RpcConfig {
+@AutoConfigureAfter
+public class RpcConfig implements BeanPostProcessor {
+
     @Bean
     public DRpcBootstrap rpcConsumerConfig() {
         DRpcBootstrap.getInstance()
@@ -141,6 +145,35 @@ public class RpcConfig {
 
         return DRpcBootstrap.getInstance();
     }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+
+        try {
+                Field[] declaredFieldsArray = bean.getClass().getDeclaredFields();
+                List<Field> fieldList = Arrays
+                        .stream(declaredFieldsArray)
+                        .filter(field -> {
+                    return field.getAnnotation(RpcReference.class) != null;
+                }).collect(Collectors.toList());
+
+                // create each field that reference
+                for (Field field : fieldList) {
+                    ProxyConfig<?> proxyConfig = new ProxyConfig<>(field.getType());
+                    // Use ProxyConfig to create a proxy object and inject the proxy object into the field
+                    try {
+                        field.setAccessible(true);
+                        field.set(bean, proxyConfig.get());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to set proxy instance to field: " + field.getName(), e);
+                    }
+                }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process @RpcReference annotation", e);
+        }
+        return bean;
+    }
 }
 ```
 
@@ -148,22 +181,22 @@ public class RpcConfig {
 
 Consumer Test
 
-- create a proxy object for consumer service that needing
+- Create a proxy object for consumer service that needing `new ProxyConfig<>(UserService.class).get();`
 
-```java
-private final UserService userService = new ProxyConfig<>(UserService.class).get();
-```
+- Use `@RpcReference`
 
 ```java
 @RestController
 @RequestMapping("/payment")
 public class PaymentController {
 
-    private final UserService userService = new ProxyConfig<>(UserService.class).get();
+    //private final UserService userService = new ProxyConfig<>(UserService.class).get();
+    @RpcReference
+    private UserService userService;
 
-    @GetMapping
-    public String payment() {
-        return userService.sayHello("Kyle");
+    @GetMapping("/{accountName}")
+    public String payment(@PathVariable String accountName) {
+        return userService.sayHello(accountName);
     }
 }
 ```
@@ -172,7 +205,7 @@ public class PaymentController {
 
 
 
-**Provider**
+## **Provider**
 
 Configure the default startup as a bean
 
