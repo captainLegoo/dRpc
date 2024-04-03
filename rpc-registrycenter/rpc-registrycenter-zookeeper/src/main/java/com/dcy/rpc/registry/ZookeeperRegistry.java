@@ -122,6 +122,8 @@ public class ZookeeperRegistry implements Registry {
                     .build();
 
             client.start();
+            // TODO provider and consumer both will create default node when connect to zookeeper
+            //  Need to fix it: only provide can create node
             createDefaultNode();
 
             return client;
