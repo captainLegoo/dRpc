@@ -12,7 +12,7 @@ public class Provider {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-Provider")
                 .port(9000)
-                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.30.74", 2181)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.200.128", 2181)
                 .scanAndPublish("com.dcy.rpc.service.impl")
                 .start();
     }
