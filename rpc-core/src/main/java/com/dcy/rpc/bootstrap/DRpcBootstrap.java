@@ -243,6 +243,7 @@ public class DRpcBootstrap {
      * service provider start
      */
     public void start() {
+        // start netty server
         ProviderNettyStarter providerNettyStarter = new ProviderNettyStarter(globalConfig.getPort());
         providerNettyStarter.start();
     }
