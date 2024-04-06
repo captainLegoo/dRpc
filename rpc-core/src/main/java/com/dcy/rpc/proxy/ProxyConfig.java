@@ -40,6 +40,9 @@ public class ProxyConfig<T> {
         Object proxyInstance = Proxy.newProxyInstance(classLoader, classes, new ConsumerInvocationHandler<T>(interfaceRef));
         log.info("【{}】 proxy is created.", interfaceRef.getName());
 
+        // (Lazy) Once the proxy object is successfully created, the node can be dynamically detected online and offline.
+        DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().UpAndDownAddress(interfaceRef.getName());
+
         return (T) proxyInstance;
     }
 }
