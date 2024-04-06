@@ -72,12 +72,6 @@
             <artifactId>fastjson2</artifactId>
         </dependency>
 
-        <!-- hessian -->
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
