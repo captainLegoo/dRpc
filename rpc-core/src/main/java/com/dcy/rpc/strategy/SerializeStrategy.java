@@ -1,7 +1,7 @@
 package com.dcy.rpc.strategy;
 
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
-import com.dcy.rpc.serialize.JdkSerialize;
+import com.dcy.rpc.serialize.jdk.JdkSerialize;
 import com.dcy.rpc.serialize.Serialize;
 import lombok.extern.slf4j.Slf4j;
 
