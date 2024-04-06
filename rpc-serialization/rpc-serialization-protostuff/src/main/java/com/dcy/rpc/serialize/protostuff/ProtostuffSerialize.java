@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2024/04/06
  * <p>
  * Serialization using protostuff
+ * TODO: can not deserialize the object.class
  */
 @Slf4j
 public class ProtostuffSerialize implements Serialize {
@@ -35,22 +36,32 @@ public class ProtostuffSerialize implements Serialize {
     /**
      * Deserialization
      * @param bytes Byte array to be deserialized
-     * @param c     The class object of the target class
+     * @param clazz The class object of the target class
      * @param <T>
      * @return
      */
     @Override
-    public <T> T deserialize(byte[] bytes, Class<T> c) {
-        T t = null;
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         try {
-            t = c.newInstance();
-            Schema schema = RuntimeSchema.getSchema(t.getClass());
-            ProtostuffIOUtil.mergeFrom(bytes, t, schema);
-            log.debug("The object is deserialized using protostuff【{}】", bytes);
+            T message = clazz.newInstance();
+            Schema<T> schema = RuntimeSchema.getSchema(clazz);
+            ProtostuffIOUtil.mergeFrom(bytes, message, schema);
+            return message;
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            log.error("Exception when using protostuff deserialized object【{}】", bytes, e);
+            return null;
         }
-        return t;
+    }
+
+    public static void main(String[] args) {
+        ProtostuffSerialize protostuffSerialize = new ProtostuffSerialize();
+        Object object = "123";
+        byte[] serializered = protostuffSerialize.serializer(object);
+
+        Object deserialize = protostuffSerialize.deserialize(serializered, Object.class);
+        System.out.println("deserialize = " + deserialize);
     }
 }
