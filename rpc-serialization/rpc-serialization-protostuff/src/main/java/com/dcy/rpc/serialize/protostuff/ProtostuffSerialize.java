@@ -6,6 +6,7 @@ import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Kyle
@@ -13,6 +14,7 @@ import io.protostuff.runtime.RuntimeSchema;
  * <p>
  * Serialization using protostuff
  */
+@Slf4j
 public class ProtostuffSerialize implements Serialize {
 
     /**
@@ -23,8 +25,10 @@ public class ProtostuffSerialize implements Serialize {
     @Override
     public byte[] serializer(Object object) {
         Schema schema = RuntimeSchema.getSchema(object.getClass());
-        return ProtostuffIOUtil.toByteArray(object, schema,
+        byte[] bytes = ProtostuffIOUtil.toByteArray(object, schema,
                 LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        log.debug("The object is serialized using protostuff【{}】, and the serialized bytes are【{}】", object, bytes.length);
+        return bytes;
 
     }
 
@@ -42,10 +46,10 @@ public class ProtostuffSerialize implements Serialize {
             t = c.newInstance();
             Schema schema = RuntimeSchema.getSchema(t.getClass());
             ProtostuffIOUtil.mergeFrom(bytes, t, schema);
-        } catch (InstantiationException e) {
+            log.debug("The object is deserialized using protostuff【{}】", bytes);
+        } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Exception when using protostuff deserialized object【{}】", bytes, e);
         }
         return t;
     }
