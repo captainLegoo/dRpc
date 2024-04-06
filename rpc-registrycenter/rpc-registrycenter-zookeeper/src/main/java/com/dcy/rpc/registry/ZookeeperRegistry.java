@@ -1,5 +1,6 @@
 package com.dcy.rpc.registry;
 
+import com.dcy.rpc.cache.AddressCache;
 import com.dcy.rpc.constant.ConnectConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
@@ -106,6 +107,15 @@ public class ZookeeperRegistry implements Registry {
         }
 
         return null;
+    }
+
+    @Override
+    public void UpAndDownAddress(String serviceName) {
+        String servicePath = ConnectConstant.NODE_DEFAULT_PATH + "/" + serviceName;
+        boolean isContains = AddressCache.SERVICE_ADDRESS_DETECTION_CACHE.contains(servicePath);
+        if (isContains) {
+            AddressCache.SERVICE_ADDRESS_DETECTION_CACHE.add(servicePath);
+        }
     }
 
     private CuratorFramework connectZookeeper(String address, int host) {
