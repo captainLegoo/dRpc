@@ -25,9 +25,9 @@ public class SerializeStrategy {
         SERIALIZER_CACHE.put(SerializeTypeEnum.JDK, jdkSerializer);
         SERIALIZER_Id_CACHE.put(SerializeTypeEnum.JDK.getSerializeId(), jdkSerializer);
 
-        Serialize protostuffSerialize = new ProtostuffSerialize();
-        SERIALIZER_CACHE.put(SerializeTypeEnum.PROTOSTUFF, protostuffSerialize);
-        SERIALIZER_Id_CACHE.put(SerializeTypeEnum.PROTOSTUFF.getSerializeId(), protostuffSerialize);
+        //Serialize protostuffSerialize = new ProtostuffSerialize();
+        //SERIALIZER_CACHE.put(SerializeTypeEnum.PROTOSTUFF, protostuffSerialize);
+        //SERIALIZER_Id_CACHE.put(SerializeTypeEnum.PROTOSTUFF.getSerializeId(), protostuffSerialize);
     }
 
     /**
