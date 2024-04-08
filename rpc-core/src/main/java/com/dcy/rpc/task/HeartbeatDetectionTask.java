@@ -35,7 +35,7 @@ public class HeartbeatDetectionTask implements Runnable{
 
     @Override
     public void run() {
-        log.debug("Heartbeat Detection TIme -> {}", new Date());
+        log.debug("Heartbeat Detection Time -> {}", new Date());
 
         for (Map.Entry<String, List<InetSocketAddress>> entry : ConsumerCache.SERVICE_ADDRESS_MAP.entrySet()) {
             String serviceName = entry.getKey();
