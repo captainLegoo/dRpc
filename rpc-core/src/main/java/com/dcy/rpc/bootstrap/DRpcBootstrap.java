@@ -14,6 +14,7 @@ import com.dcy.rpc.factory.RegistryFactory;
 import com.dcy.rpc.netty.ProviderNettyStarter;
 import com.dcy.rpc.proxy.ProxyConfig;
 import com.dcy.rpc.registry.Registry;
+import com.dcy.rpc.task.HeartbeatDetectionTask;
 import com.dcy.rpc.util.GetHostAddress;
 import com.dcy.rpc.util.ScanPackage;
 import lombok.NonNull;
@@ -23,6 +24,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -115,6 +119,25 @@ public class DRpcBootstrap {
 
     public DRpcBootstrap loadbalancer(LoadbalancerTypeEnum loadbalancerTypeEnum) {
         globalConfig.setLoadbalancerTypeEnum(loadbalancerTypeEnum);
+        return this;
+    }
+
+    /**
+     * start to init each task
+     * @return
+     */
+    public DRpcBootstrap reference() {
+        //Thread thread = new Thread(new ScheduledTask(globalConfig.getRegistryConfig().getHost(), globalConfig.getRegistryConfig().getPort()));
+        //thread.setDaemon(true);
+        //thread.start();
+
+        // TODO send heart request
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleWithFixedDelay(new HeartbeatDetectionTask(),
+                15,
+                2,
+                TimeUnit.SECONDS);
+
         return this;
     }
 
