@@ -19,13 +19,14 @@ public class Consumer {
                 .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.200.128", 2181)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
-                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
+                .reference();
                 //.reference("com.dcy.rpc.service.impl");
 
         BookService bookService = new BookServiceImpl();
         bookService.writeReaderName();
-        bookService.writeReaderName();
-        bookService.writeReaderName();
-        bookService.writeReaderName();
+        //bookService.writeReaderName();
+        //bookService.writeReaderName();
+        //bookService.writeReaderName();
     }
 }
