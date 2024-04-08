@@ -35,6 +35,10 @@ public class ProxyConfig<T> {
      * @return
      */
     public T get() {
+        if (ProxyCache.PROXY_CACHE_MAP.containsKey(interfaceRef.getName())) {
+            return (T) ProxyCache.PROXY_CACHE_MAP.get(interfaceRef.getName());
+        }
+
         ClassLoader classLoader =Thread.currentThread().getContextClassLoader();
         Class<T>[] classes = new Class[]{interfaceRef};
 
