@@ -26,40 +26,34 @@ public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtoc
     protected void channelRead0(ChannelHandlerContext ctx, RequestProtocol requestProtocol) throws Exception {
         ResponseProtocol responseProtocol = new ResponseProtocol();
         responseProtocol.setRequestId(requestProtocol.getRequestId())
-                .setCode((byte) 1)
                 .setCompressTypeId(requestProtocol.getCompressType())
                 .setSerializeTypeId(requestProtocol.getSerializeType());
 
         log.debug("MethodCallHandler receive request，id is 【{}】", requestProtocol.getRequestId());
 
         if (requestProtocol.getRequestType() == RequestTypeEnum.HEART.getId()) {
-            responseProtocol.setTimeStamp(new Date().getTime())
+            responseProtocol.setRequestType(RequestTypeEnum.HEART.getId())
+                    .setCode((byte) 1)
+                    .setTimeStamp(new Date().getTime())
                     .setResponseBody(null);
-            ctx.writeAndFlush(responseProtocol);
+        } else {
+            RequestPayload requestPayload = requestProtocol.getRequestPayload();
+            ServiceConfig<?> serviceConfig = ProviderCache.SERVERS_LIST.get(requestPayload.getInterfaceName());
+
+            if (Objects.isNull(serviceConfig)) {
+                log.error("Service Not Found");
+                return;
+            }
+
+            Class<?> instance = serviceConfig.getImpl().getClass();
+            Method method = instance.getMethod(requestPayload.getMethodName(), requestPayload.getParametersType());
+            Object returnValue = method.invoke(serviceConfig.getImpl(), requestPayload.getParameterValue());
+
+            responseProtocol.setRequestType(RequestTypeEnum.REQUEST.getId())
+                    .setCode((byte) 1)
+                    .setTimeStamp(new Date().getTime())
+                    .setResponseBody(returnValue);
         }
-
-        RequestPayload requestPayload = requestProtocol.getRequestPayload();
-        ServiceConfig<?> serviceConfig = ProviderCache.SERVERS_LIST.get(requestPayload.getInterfaceName());
-
-        if (Objects.isNull(serviceConfig)) {
-            log.error("Service Not Found");
-            return;
-        }
-
-        Class<?> instance = serviceConfig.getImpl().getClass();
-        Method method = instance.getMethod(requestPayload.getMethodName(), requestPayload.getParametersType());
-        Object returnValue = method.invoke(serviceConfig.getImpl(), requestPayload.getParameterValue());
-        //ResponseProtocol responseProtocol = ResponseProtocol.builder()
-        //        .requestId(requestProtocol.getRequestId())
-        //        .code((byte) 1)
-        //        .compressTypeId(requestProtocol.getCompressType())
-        //        .serializeTypeId(requestProtocol.getSerializeType())
-        //        .timeStamp(new Date().getTime())
-        //        .responseBody(returnValue)
-        //        .build();
-
-        responseProtocol.setTimeStamp(new Date().getTime())
-                .setResponseBody(returnValue);
 
         log.debug("Method call completed，id is 【{}】", requestProtocol.getRequestId());
         ctx.writeAndFlush(responseProtocol);
