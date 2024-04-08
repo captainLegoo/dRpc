@@ -45,6 +45,7 @@ public class ProviderOutboundHandler extends MessageToByteEncoder<ResponseProtoc
 
         byteBuf.writeBytes(compressed);
         ctx.writeAndFlush(byteBuf);
+        byteBuf.clear();
         log.debug("Provider send response, id is 【{}】", requestId);
     }
 }
