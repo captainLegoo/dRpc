@@ -45,32 +45,20 @@ public class ProviderInboundHandler extends SimpleChannelInboundHandler<ByteBuf>
                 .setSerializeType(serializeByte)
                 .setCompressType(compressByte);
 
-        if (requestTypeByte == RequestTypeEnum.HEART.getId()) {
-            log.debug("Provider receive request, id is 【{}】", requestId);
-            // pass next handler
-            ctx.fireChannelRead(requestProtocol);
+        if (requestTypeByte == RequestTypeEnum.REQUEST.getId()) {
+            // request payload
+            int bodyLength = byteBuf.writerIndex() - byteBuf.readerIndex();
+            byte[] bodyByte = new byte[bodyLength];
+            byteBuf.readBytes(bodyByte);
+            // unzip the payload
+            Compress compress = CompressStrategy.getCompressById(compressByte);
+            bodyByte = compress.decompress(bodyByte);
+            //  deserialize payload
+            Serialize serializer = SerializeStrategy.getSerializerById(serializeByte);
+            RequestPayload requestPayload = serializer.deserialize(bodyByte, RequestPayload.class);
+
+            requestProtocol.setRequestPayload(requestPayload);
         }
-        // request payload
-        int bodyLength = byteBuf.writerIndex() - byteBuf.readerIndex();
-        byte[] bodyByte = new byte[bodyLength];
-        byteBuf.readBytes(bodyByte);
-        // unzip the payload
-        Compress compress = CompressStrategy.getCompressById(compressByte);
-        bodyByte = compress.decompress(bodyByte);
-        //  deserialize payload
-        Serialize serializer = SerializeStrategy.getSerializerById(serializeByte);
-        RequestPayload requestPayload = serializer.deserialize(bodyByte, RequestPayload.class);
-
-        //RequestProtocol requestProtocol = RequestProtocol.builder()
-        //        .requestId(requestId)
-        //        .requestType(requestTypeByte)
-        //        .serializeType(serializeByte)
-        //        .compressType(compressByte)
-        //        .requestPayload(requestPayload)
-        //        .build();
-
-        requestProtocol.setRequestPayload(requestPayload);
-
 
         log.debug("Provider receive request, id is 【{}】", requestId);
 
