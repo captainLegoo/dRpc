@@ -60,15 +60,26 @@ public class ConsumerNettyStarter {
     public static Channel getNettyChannel(InetSocketAddress address) {
 
         Channel channel = CHANNEL_MAP.get(address);
-        if (channel != null) {
+        if (channel != null && channel.isActive()) {
             return channel;
         }
+
+        // If the channel is invalid or does not exist, remove it from the cache
+        if (channel != null && !channel.isActive()) {
+            CHANNEL_MAP.remove(address);
+            // Set to null to ensure subsequent attempts to reconnect
+            channel = null;
+        }
+
         CompletableFuture<Channel> completableFutureChannel = new CompletableFuture<>();
         bootstrap.connect(address).addListener((ChannelFutureListener) channelFuture -> {
-            boolean success = channelFuture.isSuccess();
-            if (success) {
+            if (channelFuture.isSuccess()) {
                 log.info("Connection has been successfully established with network 【{}】.", address);
-                completableFutureChannel.complete(channelFuture.channel());
+                Channel newChannel = channelFuture.channel();
+                CHANNEL_MAP.put(address, newChannel);
+                completableFutureChannel.complete(newChannel);
+            } else {
+                completableFutureChannel.completeExceptionally(channelFuture.cause());
             }
         });
 
@@ -76,7 +87,8 @@ public class ConsumerNettyStarter {
             channel = completableFutureChannel.get(3, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.debug("An exception occurred while acquiring a channel.");
-            throw new ChannelException(e);
+            CHANNEL_MAP.remove(address);
+            throw new ChannelException("Failed to acquire channel", e);
         }
 
         if (channel == null) {
@@ -84,7 +96,6 @@ public class ConsumerNettyStarter {
             throw new ChannelException("An exception occurred while getting the channel channel.");
         }
 
-        CHANNEL_MAP.put(address, channel);
 
         return channel;
     }
