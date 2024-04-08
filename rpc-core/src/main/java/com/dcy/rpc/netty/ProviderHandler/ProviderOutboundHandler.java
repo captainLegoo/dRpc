@@ -27,7 +27,7 @@ public class ProviderOutboundHandler extends MessageToByteEncoder<ResponseProtoc
         byteBuf.writeLong(requestId);
         // request type
         byte requestType = responseProtocol.getRequestType();
-        byteBuf.writeLong(requestType);
+        byteBuf.writeByte(requestType);
         // response code
         byteBuf.writeByte(responseProtocol.getCode());
         // serialize type
