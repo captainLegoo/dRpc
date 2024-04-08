@@ -5,6 +5,7 @@ import com.dcy.rpc.config.ServiceConfig;
 import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
 import com.dcy.rpc.entity.ResponseProtocol;
+import com.dcy.rpc.enumeration.RequestTypeEnum;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,19 @@ import java.util.Objects;
 public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtocol> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RequestProtocol requestProtocol) throws Exception {
+        ResponseProtocol responseProtocol = new ResponseProtocol();
+        responseProtocol.setRequestId(requestProtocol.getRequestId())
+                .setCode((byte) 1)
+                .setCompressTypeId(requestProtocol.getCompressType())
+                .setSerializeTypeId(requestProtocol.getSerializeType());
+
         log.debug("MethodCallHandler receive request，id is 【{}】", requestProtocol.getRequestId());
+
+        if (requestProtocol.getRequestType() == RequestTypeEnum.HEART.getId()) {
+            responseProtocol.setTimeStamp(new Date().getTime())
+                    .setResponseBody(null);
+            ctx.writeAndFlush(responseProtocol);
+        }
 
         RequestPayload requestPayload = requestProtocol.getRequestPayload();
         ServiceConfig<?> serviceConfig = ProviderCache.SERVERS_LIST.get(requestPayload.getInterfaceName());
@@ -36,14 +49,17 @@ public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtoc
         Class<?> instance = serviceConfig.getImpl().getClass();
         Method method = instance.getMethod(requestPayload.getMethodName(), requestPayload.getParametersType());
         Object returnValue = method.invoke(serviceConfig.getImpl(), requestPayload.getParameterValue());
-        ResponseProtocol responseProtocol = ResponseProtocol.builder()
-                .requestId(requestProtocol.getRequestId())
-                .code((byte) 1)
-                .compressTypeId(requestProtocol.getCompressType())
-                .serializeTypeId(requestProtocol.getSerializeType())
-                .timeStamp(new Date().getTime())
-                .responseBody(returnValue)
-                .build();
+        //ResponseProtocol responseProtocol = ResponseProtocol.builder()
+        //        .requestId(requestProtocol.getRequestId())
+        //        .code((byte) 1)
+        //        .compressTypeId(requestProtocol.getCompressType())
+        //        .serializeTypeId(requestProtocol.getSerializeType())
+        //        .timeStamp(new Date().getTime())
+        //        .responseBody(returnValue)
+        //        .build();
+
+        responseProtocol.setTimeStamp(new Date().getTime())
+                .setResponseBody(returnValue);
 
         log.debug("Method call completed，id is 【{}】", requestProtocol.getRequestId());
         ctx.writeAndFlush(responseProtocol);
