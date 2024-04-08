@@ -2,6 +2,7 @@ package com.dcy.rpc.netty.ProviderHandler;
 
 import com.dcy.rpc.compress.Compress;
 import com.dcy.rpc.entity.ResponseProtocol;
+import com.dcy.rpc.enumeration.RequestTypeEnum;
 import com.dcy.rpc.serialize.Serialize;
 import com.dcy.rpc.strategy.CompressStrategy;
 import com.dcy.rpc.strategy.SerializeStrategy;
@@ -24,6 +25,9 @@ public class ProviderOutboundHandler extends MessageToByteEncoder<ResponseProtoc
         // request id
         long requestId = responseProtocol.getRequestId();
         byteBuf.writeLong(requestId);
+        // request type
+        byte requestType = responseProtocol.getRequestType();
+        byteBuf.writeLong(requestType);
         // response code
         byteBuf.writeByte(responseProtocol.getCode());
         // serialize type
@@ -35,15 +39,18 @@ public class ProviderOutboundHandler extends MessageToByteEncoder<ResponseProtoc
         // time stamp
         byteBuf.writeLong(responseProtocol.getTimeStamp());
 
-        //  serialize response body
-        Serialize serializer = SerializeStrategy.getSerializerById(serializeTypeId);
-        byte[] serializered = serializer.serializer(responseProtocol.getResponseBody());
+        if (requestType == RequestTypeEnum.REQUEST.getId()) {
+            //  serialize response body
+            Serialize serializer = SerializeStrategy.getSerializerById(serializeTypeId);
+            byte[] serializered = serializer.serializer(responseProtocol.getResponseBody());
 
-        // compress response body
-        Compress compress = CompressStrategy.getCompressById(compressTypeId);
-        byte[] compressed = compress.compress(serializered);
+            // compress response body
+            Compress compress = CompressStrategy.getCompressById(compressTypeId);
+            byte[] compressed = compress.compress(serializered);
 
-        byteBuf.writeBytes(compressed);
+            byteBuf.writeBytes(compressed);
+        }
+
         ctx.writeAndFlush(byteBuf);
         byteBuf.clear();
         log.debug("Provider send response, id is 【{}】", requestId);
