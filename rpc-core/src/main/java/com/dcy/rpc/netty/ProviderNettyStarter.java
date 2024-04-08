@@ -56,7 +56,15 @@ public class ProviderNettyStarter {
             log.info("service provider started successfully");
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
+            // TODO When shutdown program in Spring project,
+            //  the system will raise an exception
+            if (boosGroup != null) {
+                boosGroup.shutdownGracefully();
+            }
+            if (workGroup != null) {
+                workGroup.shutdownGracefully();
+            }
+            //e.printStackTrace();
         } finally {
             boosGroup.shutdownGracefully();
             workGroup.shutdownGracefully();

@@ -1,8 +1,9 @@
 package com.dcy.rpc.strategy;
 
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
-import com.dcy.rpc.serialize.JdkSerialize;
+import com.dcy.rpc.serialize.jdk.JdkSerialize;
 import com.dcy.rpc.serialize.Serialize;
+import com.dcy.rpc.serialize.protostuff.ProtostuffSerialize;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -23,6 +24,10 @@ public class SerializeStrategy {
         Serialize jdkSerializer = new JdkSerialize();
         SERIALIZER_CACHE.put(SerializeTypeEnum.JDK, jdkSerializer);
         SERIALIZER_Id_CACHE.put(SerializeTypeEnum.JDK.getSerializeId(), jdkSerializer);
+
+        //Serialize protostuffSerialize = new ProtostuffSerialize();
+        //SERIALIZER_CACHE.put(SerializeTypeEnum.PROTOSTUFF, protostuffSerialize);
+        //SERIALIZER_Id_CACHE.put(SerializeTypeEnum.PROTOSTUFF.getSerializeId(), protostuffSerialize);
     }
 
     /**

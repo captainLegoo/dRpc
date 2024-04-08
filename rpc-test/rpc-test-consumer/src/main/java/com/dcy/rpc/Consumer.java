@@ -13,21 +13,20 @@ import com.dcy.rpc.service.impl.BookServiceImpl;
  * @date 2024/02/19
  */
 public class Consumer {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-consumer")
-                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.30.74", 2181)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.200.128", 2181)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
-                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
+                .reference();
                 //.reference("com.dcy.rpc.service.impl");
 
         BookService bookService = new BookServiceImpl();
         bookService.writeReaderName();
-
-        //Channel channel = ConsumerNettyStarter.getNettyChannel("127.0.0.1", 9000);
-        //channel.writeAndFlush("Hello Provider");
-        //UserService userService = new ProxyConfig<>(UserService.class).get();
-        //userService.sayHello("Hi, I'm mike");
+        //bookService.writeReaderName();
+        //bookService.writeReaderName();
+        //bookService.writeReaderName();
     }
 }

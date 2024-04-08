@@ -17,7 +17,8 @@ public enum SerializeTypeEnum {
 
     JDK((byte)1, "jdk"),
     JSON((byte)2, "json"),
-    HESSIAN((byte)3, "hessian");
+    HESSIAN((byte)3, "hessian"),
+    PROTOSTUFF((byte)4, "protostuff");
 
     private byte serializeId;
     private String des;

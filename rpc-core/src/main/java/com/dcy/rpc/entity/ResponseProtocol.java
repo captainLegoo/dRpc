@@ -21,6 +21,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class ResponseProtocol {
     private long requestId;
+    private byte requestType;
     private byte code; // 1: success 2:error
     private byte serializeTypeId;
     private byte compressTypeId;

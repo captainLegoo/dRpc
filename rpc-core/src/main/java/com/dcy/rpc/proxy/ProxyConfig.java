@@ -1,6 +1,7 @@
 package com.dcy.rpc.proxy;
 
 import com.dcy.rpc.bootstrap.DRpcBootstrap;
+import com.dcy.rpc.cache.ProxyCache;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.entity.RequestProtocol;
 import com.dcy.rpc.entity.RequestPayload;
@@ -34,11 +35,22 @@ public class ProxyConfig<T> {
      * @return
      */
     public T get() {
+        if (ProxyCache.PROXY_NAME_CACHE_SET.contains(interfaceRef.getName())) {
+            return (T) ProxyCache.PROXY_OBJECT_CACHE_MAP.get(interfaceRef.getName());
+        }
+
         ClassLoader classLoader =Thread.currentThread().getContextClassLoader();
         Class<T>[] classes = new Class[]{interfaceRef};
 
         Object proxyInstance = Proxy.newProxyInstance(classLoader, classes, new ConsumerInvocationHandler<T>(interfaceRef));
         log.info("【{}】 proxy is created.", interfaceRef.getName());
+
+        // put proxy object to cache
+        ProxyCache.PROXY_NAME_CACHE_SET.add(interfaceRef.getName());
+        ProxyCache.PROXY_OBJECT_CACHE_MAP.put(interfaceRef.getName(), proxyInstance);
+
+        // (Lazy) Once the proxy object is successfully created, the node can be dynamically detected online and offline.
+        DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().UpAndDownAddress(interfaceRef.getName());
 
         return (T) proxyInstance;
     }

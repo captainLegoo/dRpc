@@ -4,6 +4,7 @@ import com.dcy.rpc.compress.Compress;
 import com.dcy.rpc.constant.MessageFormatConstant;
 import com.dcy.rpc.entity.RequestPayload;
 import com.dcy.rpc.entity.RequestProtocol;
+import com.dcy.rpc.enumeration.RequestTypeEnum;
 import com.dcy.rpc.serialize.Serialize;
 import com.dcy.rpc.strategy.CompressStrategy;
 import com.dcy.rpc.strategy.SerializeStrategy;
@@ -53,7 +54,8 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
         // version
         byteBuf.writeByte(MessageFormatConstant.VERSION);
         // request type
-        byteBuf.writeByte(requestProtocol.getRequestType());
+        byte requestType = requestProtocol.getRequestType();
+        byteBuf.writeByte(requestType);
         // serialize
         byte serializeType = requestProtocol.getSerializeType();
         byteBuf.writeByte(serializeType);
@@ -65,18 +67,20 @@ public class MsgToByteHandler extends MessageToByteEncoder<RequestProtocol> {
         // time stamp
         byteBuf.writeLong(requestProtocol.getTimeStamp());
 
-        RequestPayload requestPayload = requestProtocol.getRequestPayload();
+        if (requestType == RequestTypeEnum.REQUEST.getId()) {
+            RequestPayload requestPayload = requestProtocol.getRequestPayload();
 
-        // serialize the payload
-        Serialize serializer = SerializeStrategy.getSerializerById(serializeType);
-        byte[] serializedPayload = serializer.serializer(requestPayload);
+            // serialize the payload
+            Serialize serializer = SerializeStrategy.getSerializerById(serializeType);
+            byte[] serializedPayload = serializer.serializer(requestPayload);
 
-        // compress the payload
-        Compress compress = CompressStrategy.getCompressById(compressType);
-        byte[] compressedPayload = compress.compress(serializedPayload);
+            // compress the payload
+            Compress compress = CompressStrategy.getCompressById(compressType);
+            byte[] compressedPayload = compress.compress(serializedPayload);
 
-        // request body
-        byteBuf.writeBytes(compressedPayload);
+            // request body
+            byteBuf.writeBytes(compressedPayload);
+        }
 
         // when finished, clear the buffer
         ctx.writeAndFlush(byteBuf).addListener((ChannelFutureListener) channelFuture -> {

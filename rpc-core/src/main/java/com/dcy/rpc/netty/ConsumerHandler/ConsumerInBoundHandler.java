@@ -2,6 +2,8 @@ package com.dcy.rpc.netty.ConsumerHandler;
 
 import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.compress.Compress;
+import com.dcy.rpc.constant.MessageConstant;
+import com.dcy.rpc.enumeration.RequestTypeEnum;
 import com.dcy.rpc.serialize.Serialize;
 import com.dcy.rpc.strategy.CompressStrategy;
 import com.dcy.rpc.strategy.SerializeStrategy;
@@ -23,6 +25,8 @@ public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<ByteBuf>
         // request id
         long requestId = byteBuf.readLong();
         log.debug("ConsumerInBoundHandler receive response, id is 【{}】", requestId);
+        // request type
+        byte requestType = byteBuf.readByte();
         // response code
         byte code = byteBuf.readByte();
         // serialize Type Id
@@ -31,18 +35,24 @@ public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<ByteBuf>
         byte compressTypeId = byteBuf.readByte();
         // time stamp
         long timeStamp = byteBuf.readLong();
-        // response body
-        int responseBodyLength = byteBuf.writerIndex() - byteBuf.readerIndex();
-        byte[] responseBodyByte = new byte[responseBodyLength];
-        byteBuf.readBytes(responseBodyByte);
 
-        // decompress the response body
-        Compress compress = CompressStrategy.getCompressById(compressTypeId);
-        responseBodyByte = compress.decompress(responseBodyByte);
+        Object responseBody = null;
+        if (requestType == RequestTypeEnum.REQUEST.getId()) {
+            // response body
+            int responseBodyLength = byteBuf.writerIndex() - byteBuf.readerIndex();
+            byte[] responseBodyByte = new byte[responseBodyLength];
+            byteBuf.readBytes(responseBodyByte);
 
-        // deserialize the response body
-        Serialize serializer = SerializeStrategy.getSerializerById(serializeTypeId);
-        Object responseBody = serializer.deserialize(responseBodyByte, Object.class);
+            // decompress the response body
+            Compress compress = CompressStrategy.getCompressById(compressTypeId);
+            responseBodyByte = compress.decompress(responseBodyByte);
+
+            // deserialize the response body
+            Serialize serializer = SerializeStrategy.getSerializerById(serializeTypeId);
+            responseBody = serializer.deserialize(responseBodyByte, Object.class);
+        } else {
+            responseBody = MessageConstant.HEARTBEAT_REQUEST;
+        }
 
         // get completableFuture from cache
         CompletableFuture<Object> completableFuture = ConsumerCache.FUTURES_NAP.get(requestId);
