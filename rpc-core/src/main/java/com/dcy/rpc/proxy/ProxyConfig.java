@@ -35,8 +35,8 @@ public class ProxyConfig<T> {
      * @return
      */
     public T get() {
-        if (ProxyCache.PROXY_CACHE_MAP.containsKey(interfaceRef.getName())) {
-            return (T) ProxyCache.PROXY_CACHE_MAP.get(interfaceRef.getName());
+        if (ProxyCache.PROXY_NAME_CACHE_SET.contains(interfaceRef.getName())) {
+            return (T) ProxyCache.PROXY_OBJECT_CACHE_MAP.get(interfaceRef.getName());
         }
 
         ClassLoader classLoader =Thread.currentThread().getContextClassLoader();
@@ -46,7 +46,8 @@ public class ProxyConfig<T> {
         log.info("【{}】 proxy is created.", interfaceRef.getName());
 
         // put proxy object to cache
-        ProxyCache.PROXY_CACHE_MAP.put(interfaceRef.getName(), proxyInstance);
+        ProxyCache.PROXY_NAME_CACHE_SET.add(interfaceRef.getName());
+        ProxyCache.PROXY_OBJECT_CACHE_MAP.put(interfaceRef.getName(), proxyInstance);
 
         // (Lazy) Once the proxy object is successfully created, the node can be dynamically detected online and offline.
         DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().UpAndDownAddress(interfaceRef.getName());
