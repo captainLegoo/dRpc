@@ -1,22 +1,21 @@
 package com.dcy.rpc.netty;
 
+import com.dcy.rpc.cache.NettyCache;
 import com.dcy.rpc.netty.ConsumerHandler.ConsumerInBoundHandler;
 import com.dcy.rpc.netty.ConsumerHandler.MsgToByteHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +29,6 @@ import java.util.concurrent.TimeoutException;
  */
 @Slf4j
 public class ConsumerNettyStarter {
-
-    private static final Map<InetSocketAddress, Channel> CHANNEL_MAP = new HashMap<>();
 
     private static final Bootstrap bootstrap = new Bootstrap();
 
@@ -59,16 +56,15 @@ public class ConsumerNettyStarter {
 
     public static Channel getNettyChannel(InetSocketAddress address) {
 
-        Channel channel = CHANNEL_MAP.get(address);
+        Channel channel = NettyCache.CHANNEL_MAP.get(address);
         if (channel != null && channel.isActive()) {
+            log.debug("The channel is still active -> 【{}】", channel.remoteAddress());
             return channel;
         }
 
         // If the channel is invalid or does not exist, remove it from the cache
-        if (channel != null && !channel.isActive()) {
-            CHANNEL_MAP.remove(address);
-            // Set to null to ensure subsequent attempts to reconnect
-            channel = null;
+        if (channel != null) {
+            NettyCache.CHANNEL_MAP.remove(address);
         }
 
         CompletableFuture<Channel> completableFutureChannel = new CompletableFuture<>();
@@ -76,7 +72,7 @@ public class ConsumerNettyStarter {
             if (channelFuture.isSuccess()) {
                 log.info("Connection has been successfully established with network 【{}】.", address);
                 Channel newChannel = channelFuture.channel();
-                CHANNEL_MAP.put(address, newChannel);
+                NettyCache.CHANNEL_MAP.put(address, newChannel);
                 completableFutureChannel.complete(newChannel);
             } else {
                 completableFutureChannel.completeExceptionally(channelFuture.cause());
@@ -87,13 +83,13 @@ public class ConsumerNettyStarter {
             channel = completableFutureChannel.get(3, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.debug("An exception occurred while acquiring a channel.");
-            CHANNEL_MAP.remove(address);
-            throw new ChannelException("Failed to acquire channel", e);
+            NettyCache.CHANNEL_MAP.remove(address);
+            //throw new ChannelException("Failed to acquire channel", e);
         }
 
         if (channel == null) {
             log.error("An exception occurred while acquiring or establishing a channel with 【{}】.", address);
-            throw new ChannelException("An exception occurred while getting the channel channel.");
+            //throw new ChannelException("An exception occurred while getting the channel channel.");
         }
 
 
