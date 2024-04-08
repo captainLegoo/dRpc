@@ -2,6 +2,7 @@ package com.dcy.rpc.netty.ConsumerHandler;
 
 import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.compress.Compress;
+import com.dcy.rpc.constant.MessageConstant;
 import com.dcy.rpc.enumeration.RequestTypeEnum;
 import com.dcy.rpc.serialize.Serialize;
 import com.dcy.rpc.strategy.CompressStrategy;
@@ -50,7 +51,7 @@ public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<ByteBuf>
             Serialize serializer = SerializeStrategy.getSerializerById(serializeTypeId);
             responseBody = serializer.deserialize(responseBodyByte, Object.class);
         } else {
-            responseBody = "Heart beat";
+            responseBody = MessageConstant.HEARTBEAT_REQUEST;
         }
 
         // get completableFuture from cache
