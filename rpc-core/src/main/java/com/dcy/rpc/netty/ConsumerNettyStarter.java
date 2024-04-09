@@ -63,9 +63,9 @@ public class ConsumerNettyStarter {
         }
 
         // If the channel is invalid or does not exist, remove it from the cache
-        if (channel != null) {
-            NettyCache.CHANNEL_MAP.remove(address);
-        }
+        //if (!channel.isActive()) {
+        //    NettyCache.CHANNEL_MAP.remove(address);
+        //}
 
         CompletableFuture<Channel> completableFutureChannel = new CompletableFuture<>();
         bootstrap.connect(address).addListener((ChannelFutureListener) channelFuture -> {
