@@ -75,7 +75,7 @@ public class SendHeartbeatRequest implements Runnable{
     }
 
     private void removeInvalidAddress() {
-        inetSocketAddressList.remove(address);
+        //inetSocketAddressList.remove(address);
         NettyCache.CHANNEL_MAP.remove(address);
         ConsumerCache.SERVICE_ADDRESS_MAP.get(serviceName).remove(address);
     }
