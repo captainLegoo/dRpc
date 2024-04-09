@@ -3,6 +3,8 @@ package com.dcy.rpc.listen;
 import com.dcy.rpc.cache.ZkpCache;
 import com.dcy.rpc.constant.ConnectConstant;
 import com.dcy.rpc.registry.Watcher;
+import io.netty.channel.Channel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 
 import java.net.InetSocketAddress;
@@ -14,6 +16,7 @@ import java.util.*;
  * <p>
  * listen address change
  */
+@Slf4j
 public class ListenZkpServiceAddress implements Watcher, Runnable {
 
     private final String clientAddress;
@@ -24,11 +27,14 @@ public class ListenZkpServiceAddress implements Watcher, Runnable {
 
     private final Map<String, List<InetSocketAddress>> serviceAddressMap;
 
-    public ListenZkpServiceAddress(String clientAddress, Set<String> proxyNameCacheSet, Map<String, List<InetSocketAddress>> serviceAddressMap) {
+    public final Map<InetSocketAddress, Channel> channelMap;
+
+    public ListenZkpServiceAddress(String clientAddress, Set<String> proxyNameCacheSet, Map<String, List<InetSocketAddress>> serviceAddressMap, Map<InetSocketAddress, Channel> channelMap) {
         this.clientAddress = clientAddress;
         this.client = ZkpCache.CLIENT_CACHE.get(clientAddress);
         this.proxyNameCacheSet = proxyNameCacheSet;
         this.serviceAddressMap = serviceAddressMap;
+        this.channelMap = channelMap;
     }
 
     @Override
@@ -57,8 +63,11 @@ public class ListenZkpServiceAddress implements Watcher, Runnable {
                 for (InetSocketAddress address : activeAddressList.toArray(new InetSocketAddress[0])) {
                     boolean contains = addressFromZkpList.contains(address);
                     if (!contains) {
-                        flag = true;
-                        activeAddressList.remove(address);
+                        if (Objects.isNull(channelMap.get(address)) || !channelMap.get(address).isActive()) {
+                            flag = false;
+                            log.debug("ListenZkpServiceAddress address remove -> {}", address);
+                            activeAddressList.remove(address);
+                        }
                     }
                 }
 
@@ -66,8 +75,11 @@ public class ListenZkpServiceAddress implements Watcher, Runnable {
                 for (InetSocketAddress address : addressFromZkpList) {
                     boolean contains = activeAddressList.contains(address);
                     if (!contains) {
-                        flag = true;
-                        activeAddressList.add(address);
+                        if (Objects.nonNull(channelMap.get(address))) {
+                            flag = true;
+                            log.debug("ListenZkpServiceAddress address add -> {}", address);
+                            activeAddressList.add(address);
+                        }
                     }
                 }
 
