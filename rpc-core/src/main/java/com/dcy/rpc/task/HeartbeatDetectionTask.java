@@ -26,7 +26,7 @@ public class HeartbeatDetectionTask implements Runnable{
 
     private final GlobalConfig globalConfig = DRpcBootstrap.getInstance().getGlobalConfig();
 
-    private final ThreadPoolExecutor pool = new ThreadPoolExecutor(3, 5, 8, TimeUnit.SECONDS,
+    private static final ThreadPoolExecutor pool = new ThreadPoolExecutor(3, 5, 8, TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(4), Executors.defaultThreadFactory(),
             new ThreadPoolExecutor.CallerRunsPolicy());
 
