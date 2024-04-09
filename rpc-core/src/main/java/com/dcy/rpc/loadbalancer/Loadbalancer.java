@@ -27,4 +27,6 @@ public interface Loadbalancer {
      * @return
      */
     InetSocketAddress selectServiceAddress(List<InetSocketAddress> lookupAddressList);
+
+    void reloadBalance(List<InetSocketAddress> lookupAddressList);
 }
