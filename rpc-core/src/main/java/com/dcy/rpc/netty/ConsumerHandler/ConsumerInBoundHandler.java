@@ -64,6 +64,6 @@ public class ConsumerInBoundHandler extends SimpleChannelInboundHandler<ByteBuf>
             completableFuture.complete(null);
         }
         // remove completableFuture
-        ConsumerCache.FUTURES_NAP.remove(requestId);
+        //ConsumerCache.FUTURES_NAP.remove(requestId);
     }
 }
