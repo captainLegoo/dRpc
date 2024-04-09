@@ -131,12 +131,14 @@ public class DRpcBootstrap {
         //thread.setDaemon(true);
         //thread.start();
 
-        // TODO send heart request
+        // TODO re-loadbalancer when address has be changed by sending heart request
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleWithFixedDelay(new HeartbeatDetectionTask(),
                 15,
                 2,
                 TimeUnit.SECONDS);
+
+        // TODO listen multi-address under proxy name in the registry center
 
         return this;
     }
