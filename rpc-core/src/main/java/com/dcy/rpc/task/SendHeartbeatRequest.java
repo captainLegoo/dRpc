@@ -26,16 +26,14 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class SendHeartbeatRequest implements Runnable{
 
-    private final String serviceName;
-    private final InetSocketAddress address;
-    private final GlobalConfig globalConfig;
-    private final List<InetSocketAddress> inetSocketAddressList;
+    private String serviceName;
+    private InetSocketAddress address;
+    private GlobalConfig globalConfig;
 
-    public SendHeartbeatRequest(String serviceName, InetSocketAddress address, GlobalConfig globalConfig, List<InetSocketAddress> inetSocketAddressList) {
+    public SendHeartbeatRequest(String serviceName, InetSocketAddress address, GlobalConfig globalConfig) {
         this.serviceName = serviceName;
         this.address = address;
         this.globalConfig = globalConfig;
-        this.inetSocketAddressList = inetSocketAddressList;
     }
 
 
@@ -54,7 +52,7 @@ public class SendHeartbeatRequest implements Runnable{
         // get available channel
         Channel channel = ConsumerNettyStarter.getNettyChannel(address);
         if (channel == null) {
-            removeInvalidAddress();
+            //removeInvalidAddress();
             return;
         }
         // create CompletableFuture and add to cache, Waiting to receive return information
@@ -65,7 +63,9 @@ public class SendHeartbeatRequest implements Runnable{
             ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
             // get heartbeat result
             Object res = completableFuture.get(5, TimeUnit.SECONDS);
-            if (Objects.isNull(res) || !res.toString().equals(MessageConstant.HEARTBEAT_REQUEST)) {
+            // remove completableFuture
+            ConsumerCache.FUTURES_NAP.remove(requestId);
+            if (!res.toString().equals(MessageConstant.HEARTBEAT_REQUEST)) {
                 removeInvalidAddress();
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -78,6 +78,7 @@ public class SendHeartbeatRequest implements Runnable{
     private void removeInvalidAddress() {
         //inetSocketAddressList.remove(address);
         NettyCache.CHANNEL_MAP.remove(address);
-        ConsumerCache.SERVICE_ADDRESS_MAP.get(serviceName).remove(address);
+        boolean remove = ConsumerCache.SERVICE_ADDRESS_MAP.get(serviceName).remove(address);
+        log.debug("removeInvalidAddress remove -> {}, address -> {}", remove, address);
     }
 }
