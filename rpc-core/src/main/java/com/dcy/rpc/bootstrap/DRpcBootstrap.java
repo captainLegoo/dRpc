@@ -3,6 +3,7 @@ package com.dcy.rpc.bootstrap;
 import com.dcy.rpc.annotation.RpcReference;
 import com.dcy.rpc.annotation.RpcService;
 import com.dcy.rpc.cache.ProviderCache;
+import com.dcy.rpc.cache.ProxyCache;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.config.ServiceConfig;
@@ -11,6 +12,7 @@ import com.dcy.rpc.enumeration.LoadbalancerTypeEnum;
 import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.factory.RegistryFactory;
+import com.dcy.rpc.listen.ListenZkpServiceAddress;
 import com.dcy.rpc.netty.ProviderNettyStarter;
 import com.dcy.rpc.proxy.ProxyConfig;
 import com.dcy.rpc.registry.Registry;
@@ -139,6 +141,13 @@ public class DRpcBootstrap {
                 TimeUnit.SECONDS);
 
         // TODO listen multi-address under proxy name in the registry center
+        String host = globalConfig.getRegistryConfig().getHost();
+        int port = globalConfig.getRegistryConfig().getPort();
+        String clientAddress = host + ":" +port;
+        scheduler.scheduleAtFixedRate(new ListenZkpServiceAddress(clientAddress, ProxyCache.PROXY_NAME_CACHE_SET),
+                15,
+                2,
+                TimeUnit.SECONDS);
 
         return this;
     }
