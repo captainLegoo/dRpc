@@ -38,12 +38,12 @@ public class HeartbeatDetectionTask implements Runnable{
             String serviceName = entry.getKey();
             log.debug("Start detect serviceName is -> {}", serviceName);
             List<InetSocketAddress> inetSocketAddressList = entry.getValue();
-            log.debug("Start detect inetSocketAddressList size() is -> {}", inetSocketAddressList.size());
+            log.debug("Start detect inetSocketAddressList is -> {}", inetSocketAddressList);
             // list convert to list
-            InetSocketAddress[] inetSocketAddressArray = inetSocketAddressList.toArray(new InetSocketAddress[0]);
-            for (InetSocketAddress address : inetSocketAddressArray) {
+            //InetSocketAddress[] inetSocketAddressArray = inetSocketAddressList.toArray(new InetSocketAddress[0]);
+            for (InetSocketAddress address : inetSocketAddressList) {
                 // send request
-                pool.execute(new SendHeartbeatRequest(serviceName, address, globalConfig, inetSocketAddressList));
+                pool.execute(new SendHeartbeatRequest(serviceName, address, globalConfig));
             }
         }
     }
