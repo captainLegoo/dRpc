@@ -55,6 +55,7 @@ public class SendHeartbeatRequest implements Runnable{
         Channel channel = ConsumerNettyStarter.getNettyChannel(address);
         if (channel == null) {
             removeInvalidAddress();
+            return;
         }
         // create CompletableFuture and add to cache, Waiting to receive return information
         CompletableFuture<Object> completableFuture = new CompletableFuture<>();
