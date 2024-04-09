@@ -2,6 +2,7 @@ package com.dcy.rpc.bootstrap;
 
 import com.dcy.rpc.annotation.RpcReference;
 import com.dcy.rpc.annotation.RpcService;
+import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.cache.ProviderCache;
 import com.dcy.rpc.cache.ProxyCache;
 import com.dcy.rpc.config.GlobalConfig;
@@ -144,7 +145,9 @@ public class DRpcBootstrap {
         String host = globalConfig.getRegistryConfig().getHost();
         int port = globalConfig.getRegistryConfig().getPort();
         String clientAddress = host + ":" +port;
-        scheduler.scheduleAtFixedRate(new ListenZkpServiceAddress(clientAddress, ProxyCache.PROXY_NAME_CACHE_SET),
+        scheduler.scheduleAtFixedRate(new ListenZkpServiceAddress(clientAddress,
+                        ProxyCache.PROXY_NAME_CACHE_SET,
+                        ConsumerCache.SERVICE_ADDRESS_MAP),
                 15,
                 2,
                 TimeUnit.SECONDS);
