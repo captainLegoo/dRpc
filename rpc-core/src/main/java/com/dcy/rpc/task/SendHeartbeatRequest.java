@@ -63,8 +63,6 @@ public class SendHeartbeatRequest implements Runnable{
             ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
             // get heartbeat result
             Object res = completableFuture.get(5, TimeUnit.SECONDS);
-            // remove completableFuture
-            ConsumerCache.FUTURES_NAP.remove(requestId);
             if (!res.toString().equals(MessageConstant.HEARTBEAT_REQUEST)) {
                 removeInvalidAddress();
             }
@@ -72,6 +70,9 @@ public class SendHeartbeatRequest implements Runnable{
             removeInvalidAddress();
             log.error("Heartbeat detection failed, address is -> {}", address);
             //throw new RuntimeException(e);
+        } finally {
+            // remove completableFuture
+            ConsumerCache.FUTURES_NAP.remove(requestId);
         }
     }
 
