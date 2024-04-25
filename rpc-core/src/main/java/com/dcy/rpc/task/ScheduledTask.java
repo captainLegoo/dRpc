@@ -2,7 +2,7 @@ package com.dcy.rpc.task;
 
 import com.dcy.rpc.cache.NettyCache;
 import com.dcy.rpc.config.GlobalConfig;
-import com.dcy.rpc.listen.ListenZkpServiceAddress2;
+import com.dcy.rpc.listen.ListenZkpServiceAddress;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,7 +33,7 @@ public class ScheduledTask {
         String host = globalConfig.getRegistryConfig().getHost();
         int port = globalConfig.getRegistryConfig().getPort();
         String clientAddress = host + ":" +port;
-        Thread thread = new Thread(new ListenZkpServiceAddress2(clientAddress, NettyCache.PENDING_REMOVE_ADDRESS_MAP));
+        Thread thread = new Thread(new ListenZkpServiceAddress(clientAddress, NettyCache.PENDING_REMOVE_ADDRESS_MAP));
         thread.setDaemon(true);
         thread.start();
     }
