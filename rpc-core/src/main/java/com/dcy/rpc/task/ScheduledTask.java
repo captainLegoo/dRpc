@@ -1,36 +1,41 @@
 package com.dcy.rpc.task;
 
-import com.dcy.rpc.cache.ProxyCache;
-import com.dcy.rpc.registry.Watcher;
-import com.dcy.rpc.watcher.UpAndDownWatcher;
-import lombok.extern.slf4j.Slf4j;
+import com.dcy.rpc.cache.NettyCache;
+import com.dcy.rpc.config.GlobalConfig;
+import com.dcy.rpc.listen.ListenZkpServiceAddress;
 
-import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kyle
- * @date 2024/04/07
- * <p>
- * scheduled task for doing
- * - dynamic address refresh
+ * @date 2024/04/11
  */
-@Slf4j
-public class ScheduledTask implements Runnable{
+public class ScheduledTask {
 
-    private String host;
-    private int port;
+    private final GlobalConfig globalConfig;
 
-    public ScheduledTask(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public ScheduledTask(GlobalConfig globalConfig) {
+        this.globalConfig = globalConfig;
     }
 
-    @Override
-    public void run() {
-        //while (true) {
-            log.debug("ScheduledTask time -> {}", new Date());
-            Watcher watcher = new UpAndDownWatcher(host, port, ProxyCache.PROXY_NAME_CACHE_SET);
-            watcher.AddressUpAndDownWatcher();
-        //}
+
+    public void startDoingTask() {
+        //
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleWithFixedDelay(new HeartbeatDetectionTask(),
+                15,
+                2,
+                TimeUnit.SECONDS);
+
+        // listen address
+        String host = globalConfig.getRegistryConfig().getHost();
+        int port = globalConfig.getRegistryConfig().getPort();
+        String clientAddress = host + ":" +port;
+        Thread thread = new Thread(new ListenZkpServiceAddress(clientAddress, NettyCache.PENDING_REMOVE_ADDRESS_MAP));
+        thread.setDaemon(true);
+        thread.start();
     }
+
 }

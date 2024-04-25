@@ -24,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Kyle
  * @date 2024/02/22
- *
+ * <p>
  * consumer netty starter
  */
 @Slf4j
@@ -62,11 +62,6 @@ public class ConsumerNettyStarter {
             return channel;
         }
 
-        // If the channel is invalid or does not exist, remove it from the cache
-        if (channel != null) {
-            NettyCache.CHANNEL_MAP.remove(address);
-        }
-
         CompletableFuture<Channel> completableFutureChannel = new CompletableFuture<>();
         bootstrap.connect(address).addListener((ChannelFutureListener) channelFuture -> {
             if (channelFuture.isSuccess()) {
@@ -83,15 +78,7 @@ public class ConsumerNettyStarter {
             channel = completableFutureChannel.get(3, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.debug("An exception occurred while acquiring a channel.");
-            NettyCache.CHANNEL_MAP.remove(address);
-            //throw new ChannelException("Failed to acquire channel", e);
         }
-
-        if (channel == null) {
-            log.error("An exception occurred while acquiring or establishing a channel with 【{}】.", address);
-            //throw new ChannelException("An exception occurred while getting the channel channel.");
-        }
-
 
         return channel;
     }

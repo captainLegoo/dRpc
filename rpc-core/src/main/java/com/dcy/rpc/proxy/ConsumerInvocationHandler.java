@@ -67,7 +67,13 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         ConsumerCache.FUTURES_NAP.put(requestId, completableFuture);
 
         // 4.get response result
-        return completableFuture.get(5, TimeUnit.SECONDS);
+        Object object = completableFuture.get(5, TimeUnit.SECONDS);
+
+        // 5.remove future from cache
+        ConsumerCache.FUTURES_NAP.remove(requestId);
+
+        // 6.return result
+        return object;
     }
 
     /**

@@ -1,24 +1,10 @@
 package com.dcy.rpc.proxy;
 
-import com.dcy.rpc.bootstrap.DRpcBootstrap;
 import com.dcy.rpc.cache.ProxyCache;
-import com.dcy.rpc.config.GlobalConfig;
-import com.dcy.rpc.entity.RequestProtocol;
-import com.dcy.rpc.entity.RequestPayload;
-import com.dcy.rpc.enumeration.RequestTypeEnum;
-import com.dcy.rpc.netty.ConsumerNettyStarter;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kyle
@@ -50,7 +36,7 @@ public class ProxyConfig<T> {
         ProxyCache.PROXY_OBJECT_CACHE_MAP.put(interfaceRef.getName(), proxyInstance);
 
         // (Lazy) Once the proxy object is successfully created, the node can be dynamically detected online and offline.
-        DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().UpAndDownAddress(interfaceRef.getName());
+        //DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().UpAndDownAddress(interfaceRef.getName());
 
         return (T) proxyInstance;
     }

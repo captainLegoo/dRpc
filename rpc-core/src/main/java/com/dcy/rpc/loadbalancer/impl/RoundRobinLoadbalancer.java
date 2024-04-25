@@ -34,4 +34,9 @@ public class RoundRobinLoadbalancer implements Loadbalancer {
         }
         return addressList.get(atomicInteger.getAndIncrement());
     }
+
+    @Override
+    public void reloadBalance(List<InetSocketAddress> lookupAddressList) {
+        addressList = lookupAddressList;
+    }
 }

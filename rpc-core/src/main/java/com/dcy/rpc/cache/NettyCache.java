@@ -4,7 +4,9 @@ import io.netty.channel.Channel;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Kyle
@@ -14,4 +16,6 @@ import java.util.Map;
  */
 public class NettyCache {
     public static final Map<InetSocketAddress, Channel> CHANNEL_MAP = new HashMap<>();
+
+    public static final Map<String, List<InetSocketAddress>> PENDING_REMOVE_ADDRESS_MAP = new ConcurrentHashMap<>();
 }
