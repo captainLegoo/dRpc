@@ -2,9 +2,7 @@ package com.dcy.rpc.bootstrap;
 
 import com.dcy.rpc.annotation.RpcReference;
 import com.dcy.rpc.annotation.RpcService;
-import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.cache.ProviderCache;
-import com.dcy.rpc.cache.ProxyCache;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.config.ServiceConfig;
@@ -13,11 +11,10 @@ import com.dcy.rpc.enumeration.LoadbalancerTypeEnum;
 import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.enumeration.SerializeTypeEnum;
 import com.dcy.rpc.factory.RegistryFactory;
-import com.dcy.rpc.listen.ListenZkpServiceAddress;
 import com.dcy.rpc.netty.ProviderNettyStarter;
 import com.dcy.rpc.proxy.ProxyConfig;
 import com.dcy.rpc.registry.Registry;
-import com.dcy.rpc.task.HeartbeatDetectionTask;
+import com.dcy.rpc.task.ScheduledTask;
 import com.dcy.rpc.util.GetHostAddress;
 import com.dcy.rpc.util.ScanPackage;
 import lombok.NonNull;
@@ -27,9 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -130,28 +124,8 @@ public class DRpcBootstrap {
      * @return
      */
     public DRpcBootstrap reference() {
-        //Thread thread = new Thread(new ScheduledTask(globalConfig.getRegistryConfig().getHost(), globalConfig.getRegistryConfig().getPort()));
-        //thread.setDaemon(true);
-        //thread.start();
-
-        // TODO re-loadbalancer when address has be changed by sending heart request
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleWithFixedDelay(new HeartbeatDetectionTask(),
-                15,
-                2,
-                TimeUnit.SECONDS);
-
-        // TODO listen multi-address under proxy name in the registry center
-        String host = globalConfig.getRegistryConfig().getHost();
-        int port = globalConfig.getRegistryConfig().getPort();
-        String clientAddress = host + ":" +port;
-        scheduler.scheduleAtFixedRate(new ListenZkpServiceAddress(clientAddress,
-                        ProxyCache.PROXY_NAME_CACHE_SET,
-                        ConsumerCache.SERVICE_ADDRESS_MAP),
-                15,
-                2,
-                TimeUnit.SECONDS);
-
+        ScheduledTask scheduledTask = new ScheduledTask(this.getGlobalConfig());
+        scheduledTask.startDoingTask();
         return this;
     }
 
