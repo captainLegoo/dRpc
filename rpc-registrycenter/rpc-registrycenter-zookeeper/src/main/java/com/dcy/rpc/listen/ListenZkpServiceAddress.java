@@ -2,112 +2,96 @@ package com.dcy.rpc.listen;
 
 import com.dcy.rpc.cache.ZkpCache;
 import com.dcy.rpc.constant.ConnectConstant;
-import com.dcy.rpc.registry.Watcher;
-import io.netty.channel.Channel;
+import com.dcy.rpc.constant.EventType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.TreeCache;
+import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
+import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Kyle
- * @date 2024/04/09
+ * @date 2024/04/11
  * <p>
- * listen address change
+ * Use Curator's automatic monitoring mechanism to monitor registered node information
  */
 @Slf4j
-public class ListenZkpServiceAddress implements Watcher, Runnable {
+public class ListenZkpServiceAddress implements Runnable{
 
-    private final String clientAddress;
+    private final String registryCenterAddress;
+    private final Map<String, List<InetSocketAddress>> pendingRemoveAddressMap;
 
-    private final CuratorFramework client;
-
-    private final Set<String> proxyNameCacheSet;
-
-    private final Map<String, List<InetSocketAddress>> serviceAddressMap;
-
-    public final Map<InetSocketAddress, Channel> channelMap;
-
-    public ListenZkpServiceAddress(String clientAddress, Set<String> proxyNameCacheSet, Map<String, List<InetSocketAddress>> serviceAddressMap, Map<InetSocketAddress, Channel> channelMap) {
-        this.clientAddress = clientAddress;
-        this.client = ZkpCache.CLIENT_CACHE.get(clientAddress);
-        this.proxyNameCacheSet = proxyNameCacheSet;
-        this.serviceAddressMap = serviceAddressMap;
-        this.channelMap = channelMap;
+    public ListenZkpServiceAddress(String registryCenterAddress, Map<String, List<InetSocketAddress>> pendingRemoveAddressMap) {
+        this.registryCenterAddress = registryCenterAddress;
+        this.pendingRemoveAddressMap = pendingRemoveAddressMap;
     }
 
     @Override
     public void run() {
-        AddressUpAndDownWatcher();
+        log.info("Start monitoring service address changes....");
+        listenAddress();
     }
 
-    @Override
-    public void AddressUpAndDownWatcher() {
-        Iterator<String> iterator = proxyNameCacheSet.iterator();
-        while (iterator.hasNext()) {
-            String serviceName = iterator.next();
-            if (!serviceAddressMap.containsKey(serviceName)) {
-                continue;
-            }
+    public void listenAddress() {
 
-            try {
-                boolean flag = false;
+        CuratorFramework client = ZkpCache.CLIENT_CACHE.get(registryCenterAddress);
 
-                List<InetSocketAddress> activeAddressList = serviceAddressMap.get(serviceName);
+        try {
+            // create a NodeCache to monitor the change of node
+            TreeCache treeCache = new TreeCache(client, ConnectConstant.NODE_DEFAULT_PATH);
 
-                String nodePath = ConnectConstant.NODE_DEFAULT_PATH + "/" + serviceName;
-                List<InetSocketAddress> addressFromZkpList = convertToSocketAddressList(client.getChildren().forPath(nodePath));
+            // register listener
+            treeCache.getListenable().addListener(new TreeCacheListener() {
+                @Override
+                public void childEvent(CuratorFramework curatorFramework, TreeCacheEvent event) throws Exception {
+                    if (Objects.nonNull(event.getData())) {
+                        TreeCacheEvent.Type eventType = event.getType();
+                        String path = event.getData().getPath();
 
-                // offline
-                for (InetSocketAddress address : activeAddressList.toArray(new InetSocketAddress[0])) {
-                    boolean contains = addressFromZkpList.contains(address);
-                    if (!contains) {
-                        if (Objects.isNull(channelMap.get(address)) || !channelMap.get(address).isActive()) {
-                            flag = false;
-                            log.debug("ListenZkpServiceAddress address remove -> {}", address);
-                            activeAddressList.remove(address);
+                        if (eventType.toString().equals(EventType.NODE_REMOVED.getTypeInfo())) {
+                            String serviceName = getServiceName(path);
+                            InetSocketAddress address = getAddress(path);
+                            log.debug("Detected that Address 【{}】 is going offline...", address);
+                            List<InetSocketAddress> addressList = pendingRemoveAddressMap.getOrDefault(serviceName, new ArrayList<>());
+                            addressList.remove(address);
+                            if (addressList.isEmpty()) {
+                                pendingRemoveAddressMap.remove(serviceName);
+                            }
+                            log.debug("Address 【{}】 has been successfully removed...", address);
+                        } else if (eventType.toString().equals(EventType.NODE_ADDED.getTypeInfo())) {
+                            log.debug("It is detected that an address is online...");
                         }
                     }
                 }
+            });
 
-                // online
-                for (InetSocketAddress address : addressFromZkpList) {
-                    boolean contains = activeAddressList.contains(address);
-                    if (!contains) {
-                        if (Objects.nonNull(channelMap.get(address))) {
-                            flag = true;
-                            log.debug("ListenZkpServiceAddress address add -> {}", address);
-                            activeAddressList.add(address);
-                        }
-                    }
-                }
+            // 3.start monitoring
+            treeCache.start();
 
-                if (flag) {
-                    // update
-                    serviceAddressMap.put(serviceName, activeAddressList);
-                    System.out.println("update serviceAddressMap: " + serviceAddressMap);
-                    // TODO need loadbalancer
-                }
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            // Loop waiting for program to terminate
+            Thread.currentThread().join();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private List<InetSocketAddress> convertToSocketAddressList(List<String> addresses) {
-        List<InetSocketAddress> socketAddressList = new ArrayList<>();
-        for (String address : addresses) {
-            String[] parts = address.split(":");
-            if (parts.length == 2) {
-                String host = parts[0];
-                int port = Integer.parseInt(parts[1]);
-                socketAddressList.add(new InetSocketAddress(host, port));
-            } else {
-                throw new IllegalArgumentException("Invalid address format: " + address);
-            }
-        }
-        return socketAddressList;
+    private String getServiceName(String path) {
+        int lastIndexOfSlash = path.lastIndexOf("/");
+        String serviceName = path.substring(ConnectConstant.NODE_DEFAULT_PATH.length() + 1, lastIndexOfSlash);
+        //log.debug("serviceName -> {}", serviceName);
+        return serviceName;
+    }
+
+    private InetSocketAddress getAddress(String path) {
+        String[] addressSplit = path.substring(path.lastIndexOf("/") + 1).split(":");
+        InetSocketAddress address = new InetSocketAddress(addressSplit[0], Integer.parseInt(addressSplit[1]));
+        //log.debug("address = " + address);
+        return address;
     }
 }
