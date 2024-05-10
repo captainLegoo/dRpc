@@ -33,7 +33,12 @@ public class ScheduledTask {
         String host = globalConfig.getRegistryConfig().getHost();
         int port = globalConfig.getRegistryConfig().getPort();
         String clientAddress = host + ":" +port;
-        Thread thread = new Thread(new ListenZkpServiceAddress(clientAddress, NettyCache.PENDING_REMOVE_ADDRESS_MAP));
+        Thread thread = new Thread(
+                new ListenZkpServiceAddress(
+                        clientAddress,
+                        NettyCache.PENDING_REMOVE_ADDRESS_MAP
+                )
+        );
         thread.setDaemon(true);
         thread.start();
     }
