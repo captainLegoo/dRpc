@@ -3,6 +3,7 @@ package com.dcy.rpc.listen;
 import com.dcy.rpc.cache.ZkpCache;
 import com.dcy.rpc.constant.ConnectConstant;
 import com.dcy.rpc.constant.EventType;
+import com.dcy.rpc.constant.IPAddressConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.TreeCache;
@@ -66,6 +67,13 @@ public class ListenZkpServiceAddress implements Runnable{
                             log.debug("Address 【{}】 has been successfully removed...", address);
                         } else if (eventType.toString().equals(EventType.NODE_ADDED.getTypeInfo())) {
                             log.debug("It is detected that an address is online...");
+                            log.error("The path of the node that has been added is {}", path);
+                            log.error("is ip address {}", isContainIpAddress(path));
+                            String serviceName = getServiceName(path);
+                            if (isContainIpAddress(path)) {
+                                InetSocketAddress address = getAddress(path);
+
+                            }
                         }
                     }
                 }
@@ -79,6 +87,22 @@ public class ListenZkpServiceAddress implements Runnable{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isContainIpAddress(String path) {
+        String lastAddressPath = path.substring(path.lastIndexOf("/") + 1);
+        if (lastAddressPath.contains(":")) {
+            log.error("isContainIpAddress-lastAddressPath => {}", lastAddressPath);
+            String[] str = lastAddressPath.split(":");
+            if (str.length != 2) {
+                return false;
+            }
+            boolean matchesIpAddress = str[0].matches(IPAddressConstant.IPADDRESS_PATTERN);
+            int portNumber = Integer.parseInt(str[1]);
+            boolean matchesIpPort = portNumber >= 0 && portNumber <= 65535;
+            return matchesIpAddress && matchesIpPort;
+        }
+        return false;
     }
 
     private String getServiceName(String path) {
