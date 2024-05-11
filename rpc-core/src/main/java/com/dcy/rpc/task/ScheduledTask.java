@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Kyle
  * @date 2024/04/11
+ * Scheduled task
+ * - 1.Sending heartbeat detection
+ * - 2.Using curator mechanism to monitor address
  */
 public class ScheduledTask {
 
@@ -36,7 +39,8 @@ public class ScheduledTask {
         Thread thread = new Thread(
                 new ListenZkpServiceAddress(
                         clientAddress,
-                        NettyCache.PENDING_REMOVE_ADDRESS_MAP
+                        NettyCache.PENDING_REMOVE_ADDRESS_MAP,
+                        NettyCache.PENDING_ADD_ADDRESS_MAP
                 )
         );
         thread.setDaemon(true);
