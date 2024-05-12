@@ -3,3 +3,7 @@ spring:
     name: rpc-test-spring-consumer
 server:
   port: 9200
+
+swagger:
+  config:
+    base-package: com.dcy.controller
