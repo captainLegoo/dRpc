@@ -18,4 +18,5 @@ public class NettyCache {
     public static final Map<InetSocketAddress, Channel> CHANNEL_MAP = new HashMap<>();
 
     public static final Map<String, List<InetSocketAddress>> PENDING_REMOVE_ADDRESS_MAP = new ConcurrentHashMap<>();
+    public static final Map<String, List<InetSocketAddress>> PENDING_ADD_ADDRESS_MAP = new ConcurrentHashMap<>();
 }
