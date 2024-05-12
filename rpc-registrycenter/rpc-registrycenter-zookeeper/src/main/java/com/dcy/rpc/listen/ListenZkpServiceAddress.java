@@ -27,10 +27,12 @@ public class ListenZkpServiceAddress implements Runnable{
 
     private final String registryCenterAddress;
     private final Map<String, List<InetSocketAddress>> pendingRemoveAddressMap;
+    private final Map<String, List<InetSocketAddress>> pendingAddAddressMap;
 
-    public ListenZkpServiceAddress(String registryCenterAddress, Map<String, List<InetSocketAddress>> pendingRemoveAddressMap) {
+    public ListenZkpServiceAddress(String registryCenterAddress, Map<String, List<InetSocketAddress>> pendingRemoveAddressMap, Map<String, List<InetSocketAddress>> pendingAddAddressMap) {
         this.registryCenterAddress = registryCenterAddress;
         this.pendingRemoveAddressMap = pendingRemoveAddressMap;
+        this.pendingAddAddressMap = pendingAddAddressMap;
     }
 
     @Override
@@ -66,13 +68,18 @@ public class ListenZkpServiceAddress implements Runnable{
                             }
                             log.debug("Address 【{}】 has been successfully removed...", address);
                         } else if (eventType.toString().equals(EventType.NODE_ADDED.getTypeInfo())) {
-                            log.debug("It is detected that an address is online...");
-                            log.error("The path of the node that has been added is {}", path);
-                            log.error("is ip address {}", isContainIpAddress(path));
                             String serviceName = getServiceName(path);
                             if (isContainIpAddress(path)) {
                                 InetSocketAddress address = getAddress(path);
-
+                                // Add service and node in pending map cache
+                                List<InetSocketAddress> addressList = pendingAddAddressMap.getOrDefault(serviceName, new ArrayList<>());
+                                if (addressList.contains(address)) {
+                                    log.debug("Address 【{}】 has been added to the pending map cache...", address);
+                                } else {
+                                    addressList.add(address);
+                                    log.debug("Address 【{}】 has been successfully added to the pending map cache...", address);
+                                }
+                                pendingAddAddressMap.putIfAbsent(serviceName, addressList);
                             }
                         }
                     }
