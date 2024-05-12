@@ -15,7 +15,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -45,13 +44,7 @@ public class SendHeartbeatRequest implements Runnable{
     public void run() {
         // encapsulate the message
         long requestId = globalConfig.getIdGenerator().getId();
-        RequestProtocol requestProtocol = new RequestProtocol()
-                .setRequestId(requestId)
-                .setRequestType(RequestTypeEnum.HEART.getId())
-                .setCompressType(globalConfig.getCompressType().getCompressId())
-                .setSerializeType(globalConfig.getSerializableType().getSerializeId())
-                .setTimeStamp(new Date().getTime())
-                .setRequestPayload(null);
+        RequestProtocol requestProtocol = initRequestProtocol(requestId);
 
         // get available channel
         Channel channel = ConsumerNettyStarter.getNettyChannel(address);
@@ -74,6 +67,16 @@ public class SendHeartbeatRequest implements Runnable{
             // remove completableFuture
             ConsumerCache.FUTURES_NAP.remove(requestId);
         }
+    }
+
+    private RequestProtocol initRequestProtocol(long requestId) {
+        return new RequestProtocol()
+                .setRequestId(requestId)
+                .setRequestType(RequestTypeEnum.HEART.getId())
+                .setCompressType(globalConfig.getCompressType().getCompressId())
+                .setSerializeType(globalConfig.getSerializableType().getSerializeId())
+                .setTimeStamp(new Date().getTime())
+                .setRequestPayload(null);
     }
 
     private void removeInvalidAddress() {
