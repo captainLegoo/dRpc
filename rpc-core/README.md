@@ -50,3 +50,12 @@
 - create strategy method for load balancer
 - create load balancer
   - round robin
+
+11.Heartbeat detection (little bug)
+
+- Consumer send
+- Provider receive
+
+12.Dynamic node online and offline
+
+- Using the mechanism of zkp

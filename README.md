@@ -57,6 +57,7 @@ rpc-metadata
 - serializer
 - compressor
 - load balancer
+- reference (Enable online and offline detection of dynamic nodes)
 
 ```java
 DRpcBootstrap.getInstance()
@@ -64,7 +65,8 @@ DRpcBootstrap.getInstance()
     .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
     .serialize(SerializeTypeEnum.JDK)
     .compress(CompressTypeEnum.DEFLATE)
-    .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+    .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
+    .reference();
 
 BookService bookService = new BookServiceImpl();
 bookService.writeReaderName();
@@ -141,7 +143,8 @@ public class RpcConfig implements BeanPostProcessor {
                 .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
-                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
+            	.reference();
 
         return DRpcBootstrap.getInstance();
     }
@@ -179,7 +182,7 @@ public class RpcConfig implements BeanPostProcessor {
 
 
 
-Consumer Test
+Consumer
 
 - Create a proxy object for consumer service that needing `new ProxyConfig<>(UserService.class).get();`
 
