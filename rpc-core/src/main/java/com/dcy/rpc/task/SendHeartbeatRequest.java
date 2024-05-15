@@ -93,6 +93,7 @@ public class SendHeartbeatRequest implements Runnable{
 
     private void reloadBalance(String serviceName) {
         Loadbalancer loadbalancer = ConsumerCache.LOADBALANCER_MAP.get(serviceName);
+        if (loadbalancer == null) return;
         loadbalancer.reloadBalance(ConsumerCache.SERVICE_ADDRESS_MAP.get(serviceName));
         log.debug("The serviceName {} has been successfully reload balanced...", serviceName);
     }
