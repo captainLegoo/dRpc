@@ -20,12 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "Data")
 public class GetDataController {
 
-    @GetMapping("/loadbalanceraddress/{serviceName}")
-    @ApiOperation("Loadbalancer Address List")
-    public Result<?> getLoadbalancerAddressList(@PathVariable String serviceName) {
-        return Result.success(ConsumerCache.LOADBALANCER_MAP.get(serviceName).getAddressList());
-    }
-
     @GetMapping("/loadbalancer")
     @ApiOperation("Loadbalancer Map")
     public Result<?> getLoadbalancerMap() {

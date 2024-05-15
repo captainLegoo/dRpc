@@ -16,7 +16,7 @@ public class Consumer {
     public static void main(String[] args) {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-consumer")
-                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.200.128", 2181)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.205.132", 2181)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
                 .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
