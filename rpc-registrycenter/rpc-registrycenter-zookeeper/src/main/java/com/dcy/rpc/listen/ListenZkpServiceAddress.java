@@ -102,7 +102,7 @@ public class ListenZkpServiceAddress implements Runnable{
     private boolean isContainIpAddress(String path) {
         String lastAddressPath = path.substring(path.lastIndexOf("/") + 1);
         if (lastAddressPath.contains(":")) {
-            log.error("isContainIpAddress-lastAddressPath => {}", lastAddressPath);
+            //log.error("isContainIpAddress-lastAddressPath => {}", lastAddressPath);
             String[] str = lastAddressPath.split(":");
             if (str.length != 2) {
                 return false;
@@ -116,13 +116,13 @@ public class ListenZkpServiceAddress implements Runnable{
     }
 
     private String getServiceName(String path) {
-        log.error("getServiceName -> {}", path);
+        //log.error("getServiceName -> {}", path);
         if (!isValidPath(path)) {
             return null;
         }
         int lastIndexOfSlash = path.lastIndexOf("/");
         String serviceName = path.substring(ConnectConstant.NODE_DEFAULT_PATH.length() + 1, lastIndexOfSlash);
-        log.error("serviceName -> {}", serviceName);
+        //log.error("serviceName -> {}", serviceName);
         return serviceName;
     }
 
