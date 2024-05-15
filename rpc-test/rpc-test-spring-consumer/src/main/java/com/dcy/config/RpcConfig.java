@@ -34,10 +34,11 @@ public class RpcConfig implements BeanPostProcessor {
     public DRpcBootstrap rpcConsumerConfig() {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-consumer")
-                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.64.128", 2181)
+                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.205.132", 2181)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
-                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
+                .reference();
 
         return DRpcBootstrap.getInstance();
     }
