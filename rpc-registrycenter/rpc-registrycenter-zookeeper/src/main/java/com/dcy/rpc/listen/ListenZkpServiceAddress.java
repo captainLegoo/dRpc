@@ -69,6 +69,9 @@ public class ListenZkpServiceAddress implements Runnable{
                             log.debug("Address 【{}】 has been successfully removed...", address);
                         } else if (eventType.toString().equals(EventType.NODE_ADDED.getTypeInfo())) {
                             String serviceName = getServiceName(path);
+                            if (serviceName == null) {
+                                return;
+                            }
                             if (isContainIpAddress(path)) {
                                 InetSocketAddress address = getAddress(path);
                                 // Add service and node in pending map cache
@@ -113,10 +116,25 @@ public class ListenZkpServiceAddress implements Runnable{
     }
 
     private String getServiceName(String path) {
+        log.error("getServiceName -> {}", path);
+        if (!isValidPath(path)) {
+            return null;
+        }
         int lastIndexOfSlash = path.lastIndexOf("/");
         String serviceName = path.substring(ConnectConstant.NODE_DEFAULT_PATH.length() + 1, lastIndexOfSlash);
-        //log.debug("serviceName -> {}", serviceName);
+        log.error("serviceName -> {}", serviceName);
         return serviceName;
+    }
+
+    private boolean isValidPath(String path) {
+        //boolean b = path.length() <= ConnectConstant.NODE_DEFAULT_PATH.length();
+        if (path.contains(":")) {
+            //String lastPartOfPath = path.substring( path.lastIndexOf("/") + 1);
+            //boolean isAddress = lastPartOfPath.matches(IPAddressConstant.IPADDRESS_PATTERN);
+            //return isAddress;
+            return true;
+        }
+        return false;
     }
 
     private InetSocketAddress getAddress(String path) {
