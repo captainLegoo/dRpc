@@ -56,6 +56,10 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
         // 2.get channel by address
         // 2.1.get available address from registry center and loadbalancer
         InetSocketAddress inetSocketAddress = getAvailableAddress(globalConfig);
+        if (Objects.isNull(inetSocketAddress)) {
+            throw new RuntimeException("No available address");
+            //return null;
+        }
 
         // 2.2.get available channel
         Channel channel = ConsumerNettyStarter.getNettyChannel(inetSocketAddress);
@@ -90,6 +94,9 @@ public class ConsumerInvocationHandler<T> implements InvocationHandler {
 
         // create loadbalancer
         List<InetSocketAddress> inetSocketAddressList = globalConfig.getRegistry().lookupAllAddress(interfaceRef.getName());
+        if (inetSocketAddressList.isEmpty()) {
+            return null;
+        }
         ConsumerCache.SERVICE_ADDRESS_MAP.put(interfaceRef.getName(), inetSocketAddressList);
         loadbalancer = LoadbalancerStrategy.getLoadbalancer(globalConfig.getLoadbalancerTypeEnum());
         // put loadbalancer to cache
