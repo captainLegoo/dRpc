@@ -11,8 +11,13 @@ import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kyle
@@ -43,29 +48,34 @@ public class ScheduledTask {
     }
 
     public void startDoingTask() {
-        scheduler.scheduleWithFixedDelay(new HeartbeatDetectionTask(),
-                15,
-                5,
+        //scheduler.scheduleWithFixedDelay(new HeartbeatDetectionTask(),
+        //        15,
+        //        5,
+        //        TimeUnit.SECONDS);
+
+        scheduler.scheduleWithFixedDelay(new checkPendingOnlineAddress(),
+                12,
+                3,
+                TimeUnit.SECONDS);
+
+        scheduler.scheduleWithFixedDelay(new CheckPendingOfflineAddressTask(),
+                14,
+                3,
                 TimeUnit.SECONDS);
 
         // listen address
         String host = globalConfig.getRegistryConfig().getHost();
         int port = globalConfig.getRegistryConfig().getPort();
         String clientAddress = host + ":" +port;
-        GlobalThreadPool.pool.execute(new ListenZkpServiceAddress(
-                clientAddress,
-                NettyCache.PENDING_REMOVE_ADDRESS_MAP,
-                NettyCache.PENDING_ADD_ADDRESS_MAP
-        ));
-        //Thread thread = new Thread(
-        //        new ListenZkpServiceAddress(
-        //                clientAddress,
-        //                NettyCache.PENDING_REMOVE_ADDRESS_MAP,
-        //                NettyCache.PENDING_ADD_ADDRESS_MAP
-        //        )
-        //);
-        //thread.setDaemon(true);
-        //thread.start();
+        Thread thread = new Thread(
+                new ListenZkpServiceAddress(
+                        clientAddress,
+                        NettyCache.PENDING_REMOVE_ADDRESS_MAP,
+                        NettyCache.PENDING_ADD_ADDRESS_MAP
+                )
+        );
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private class HeartbeatDetectionTask implements Runnable {
@@ -77,7 +87,7 @@ public class ScheduledTask {
             log.debug("Heartbeat Detection Time -> 【{}】...", new Date());
 
             try {
-                checkPendingOnlineAddress();
+                //checkPendingOnlineAddress();
                 //heartbeatDetectionTask();
             } catch (Exception e) {
                 log.error("HeartbeatDetectionTask error: {}", e.getMessage(), e);
