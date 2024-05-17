@@ -4,10 +4,7 @@ import com.dcy.rpc.cache.NettyCache;
 import com.dcy.rpc.netty.ConsumerHandler.ConsumerInBoundHandler;
 import com.dcy.rpc.netty.ConsumerHandler.MsgToByteHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -36,6 +33,7 @@ public class ConsumerNettyStarter {
         NioEventLoopGroup eventExecutors = new NioEventLoopGroup();
         bootstrap.group(eventExecutors)
                 .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 1024)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
