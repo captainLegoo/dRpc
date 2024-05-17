@@ -23,7 +23,7 @@ public class GetDataController {
     @GetMapping("/loadbalancer")
     @ApiOperation("Loadbalancer Map")
     public Result<?> getLoadbalancerMap() {
-        return Result.success(ConsumerCache.LOADBALANCER_MAP);
+        return Result.success(ConsumerCache.LOADBALANCER_MAP.toString());
     }
 
     @GetMapping("/serviceaddress")
