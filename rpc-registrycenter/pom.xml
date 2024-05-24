@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>rpc-registrycenter-zookeeper</module>
+        <module>rpc-registrycenter-redis</module>
     </modules>
 
     <properties>

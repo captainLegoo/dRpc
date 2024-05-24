@@ -35,6 +35,7 @@
         <curator.recipes.version>5.1.0</curator.recipes.version>
         <junit.version>5.8.2</junit.version>
         <protostuff.version>1.8.0</protostuff.version>
+        <jedis.version>4.2.3</jedis.version>
     </properties>
 
     <dependencyManagement>
@@ -128,6 +129,12 @@
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-runtime</artifactId>
                 <version>${protostuff.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${jedis.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
