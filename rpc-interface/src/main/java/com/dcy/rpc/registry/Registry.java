@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface Registry {
     /**
-     * Register
+     * Register a service
      * @param serviceName
      * @param localIPAddress
      * @param port
