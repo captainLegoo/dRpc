@@ -1,5 +1,6 @@
 package com.dcy.rpc.factory;
 
+import com.dcy.registry.RedisRegistry;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.registry.Registry;
@@ -21,6 +22,8 @@ public class RegistryFactory {
 
         if (Objects.requireNonNull(registryCenterEnum) == RegistryCenterEnum.ZOOKEEPER) {
             return new ZookeeperRegistry(host, port);
+        } else if (Objects.requireNonNull(registryCenterEnum) == RegistryCenterEnum.REDIS) {
+            return new RedisRegistry(host, port);
         }
         return null;
     }
