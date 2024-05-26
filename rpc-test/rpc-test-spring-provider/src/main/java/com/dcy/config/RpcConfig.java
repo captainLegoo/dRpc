@@ -18,8 +18,9 @@ public class RpcConfig {
     public DRpcBootstrap rpcProviderConfig() {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-Provider")
-                .port(9600)
-                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.205.132", 2181)
+                .port(9601)
+                //.registry(RegistryCenterEnum.ZOOKEEPER, "192.168.205.132", 2181)
+                .registry(RegistryCenterEnum.REDIS, "192.168.205.128", 6379)
                 .scanAndPublish("com.dcy.service.impl")
                 .start();
         return DRpcBootstrap.getInstance();

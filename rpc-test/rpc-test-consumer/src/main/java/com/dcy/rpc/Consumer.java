@@ -16,17 +16,18 @@ public class Consumer {
     public static void main(String[] args) {
         DRpcBootstrap.getInstance()
                 .setBootstrapName("RPC-consumer")
-                .registry(RegistryCenterEnum.ZOOKEEPER, "192.168.205.132", 2181)
+                //.registry(RegistryCenterEnum.ZOOKEEPER, "192.168.205.132", 2181)
+                .registry(RegistryCenterEnum.REDIS, "192.168.205.128", 6379)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
-                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
-                .reference();
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
+                //.reference();
                 //.reference("com.dcy.rpc.service.impl");
 
         BookService bookService = new BookServiceImpl();
         bookService.writeReaderName();
-        //bookService.writeReaderName();
-        //bookService.writeReaderName();
-        //bookService.writeReaderName();
+        bookService.writeReaderName();
+        bookService.writeReaderName();
+        bookService.writeReaderName();
     }
 }
