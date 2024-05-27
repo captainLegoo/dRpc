@@ -1,6 +1,8 @@
 package com.dcy.rpc.factory;
 
 import com.dcy.registry.RedisRegistry;
+import com.dcy.rpc.bootstrap.DRpcBootstrap;
+import com.dcy.rpc.cache.ProviderCache;
 import com.dcy.rpc.config.RegistryConfig;
 import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.registry.Registry;
@@ -23,6 +25,9 @@ public class RegistryFactory {
         if (Objects.requireNonNull(registryCenterEnum) == RegistryCenterEnum.ZOOKEEPER) {
             return new ZookeeperRegistry(host, port);
         } else if (Objects.requireNonNull(registryCenterEnum) == RegistryCenterEnum.REDIS) {
+            Runtime.getRuntime().addShutdownHook(new Thread(
+                    () -> DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().closeProgramAction(ProviderCache.SERVERS_LIST.keySet()))
+            );
             return new RedisRegistry(host, port);
         }
         return null;
