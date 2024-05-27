@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -244,6 +246,11 @@ public class DRpcBootstrap {
 
         // 2.If registration is successful, the service is cached locally
         if (isPublish) {
+            ProviderCache.SERVERS_ADDRESS_MAP.computeIfAbsent(
+                    serviceConfig.getInterfaceRef().getName(),
+                    k -> new ArrayList<>()).add(new InetSocketAddress(localIPAddress, globalConfig.getPort())
+            );
+
             ProviderCache.SERVERS_MAP.put(serviceConfig.getInterfaceRef().getName(), serviceConfig);
             return true;
         }
