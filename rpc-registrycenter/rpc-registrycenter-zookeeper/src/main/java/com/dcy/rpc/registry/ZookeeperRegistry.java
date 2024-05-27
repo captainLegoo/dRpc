@@ -14,6 +14,7 @@ import org.apache.zookeeper.data.Stat;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -108,6 +109,11 @@ public class ZookeeperRegistry implements Registry {
         }
 
         return null;
+    }
+
+    @Override
+    public void closeProgramAction(Set<String> serviceNames) {
+
     }
 
     private CuratorFramework connectZookeeper(String address, int host) {

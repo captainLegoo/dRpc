@@ -70,4 +70,13 @@ public class RedisRegistry implements Registry {
         }
         return null;
     }
+
+    @Override
+    public void closeProgramAction(Set<String> serviceNames) {
+        System.out.println("closeProgramAction: " + serviceNames.toString());
+        serviceNames.forEach(serviceName -> {
+            String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
+            jedisUtils.del(key);
+        });
+    }
 }

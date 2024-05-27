@@ -2,6 +2,7 @@ package com.dcy.rpc.registry;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Kyle
@@ -32,4 +33,10 @@ public interface Registry {
      * @return
      */
     List<InetSocketAddress> lookupAllAddress(String serviceName);
+
+    /**
+     * Close program execution
+     * @param serviceNames service name list
+     */
+    void closeProgramAction(Set<String> serviceNames);
 }
