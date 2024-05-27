@@ -37,11 +37,7 @@ public class RedisRegistry implements Registry {
         String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
         String value = localIPAddress + ":" + port;
 
-        if (jedisUtils.sSet(key, value) == 1) {
-            return true;
-        }
-
-        return false;
+        return jedisUtils.sHasKey(key, value) || jedisUtils.sSet(key, value) == 1;
     }
 
     @Override
