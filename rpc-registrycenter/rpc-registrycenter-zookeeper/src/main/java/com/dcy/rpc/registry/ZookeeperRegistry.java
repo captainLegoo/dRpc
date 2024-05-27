@@ -1,6 +1,5 @@
 package com.dcy.rpc.registry;
 
-import com.dcy.rpc.cache.AddressCache;
 import com.dcy.rpc.cache.ZkpCache;
 import com.dcy.rpc.constant.ConnectConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,7 @@ import org.apache.zookeeper.data.Stat;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -112,7 +111,7 @@ public class ZookeeperRegistry implements Registry {
     }
 
     @Override
-    public void closeProgramAction(Set<String> serviceNames) {
+    public void closeProgramAction(Map<String, List<InetSocketAddress>> serverAddressMap) {
 
     }
 

@@ -26,7 +26,12 @@ public class RegistryFactory {
             return new ZookeeperRegistry(host, port);
         } else if (Objects.requireNonNull(registryCenterEnum) == RegistryCenterEnum.REDIS) {
             Runtime.getRuntime().addShutdownHook(new Thread(
-                    () -> DRpcBootstrap.getInstance().getGlobalConfig().getRegistry().closeProgramAction(ProviderCache.SERVERS_MAP.keySet()))
+                    () -> DRpcBootstrap
+                            .getInstance()
+                            .getGlobalConfig()
+                            .getRegistry()
+                            .closeProgramAction(ProviderCache.SERVERS_ADDRESS_MAP)
+                    )
             );
             return new RedisRegistry(host, port);
         }

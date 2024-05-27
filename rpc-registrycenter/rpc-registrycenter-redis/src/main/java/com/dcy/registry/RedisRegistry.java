@@ -8,6 +8,7 @@ import com.dcy.util.JedisUtils;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,11 +69,22 @@ public class RedisRegistry implements Registry {
     }
 
     @Override
-    public void closeProgramAction(Set<String> serviceNames) {
-        System.out.println("closeProgramAction: " + serviceNames.toString());
-        serviceNames.forEach(serviceName -> {
+    public void closeProgramAction(Map<String, List<InetSocketAddress>> serverAddressMap) {
+        serverAddressMap.forEach((serviceName, inetSocketAddressList) -> {
             String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
-            jedisUtils.del(key);
+            List<String> addresses = new ArrayList<>();
+
+            inetSocketAddressList.forEach(inetSocketAddress ->
+                    addresses.add(inetSocketAddress.getHostString() + ":" + inetSocketAddress.getPort())
+            );
+
+            // Delete addresses in batches
+            jedisUtils.setRemove(key, addresses.toArray(new String[0]));
+
+            // If the collection is empty, delete the key
+            if (jedisUtils.sGetSetSize(key) == 0) {
+                jedisUtils.del(key);
+            }
         });
     }
 }

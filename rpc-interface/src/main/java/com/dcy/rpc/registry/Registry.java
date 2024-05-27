@@ -2,6 +2,7 @@ package com.dcy.rpc.registry;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,7 +37,7 @@ public interface Registry {
 
     /**
      * Close program execution
-     * @param serviceNames service name list
+     * @param serverAddressMap map of service address
      */
-    void closeProgramAction(Set<String> serviceNames);
+    void closeProgramAction(Map<String, List<InetSocketAddress>> serverAddressMap);
 }
