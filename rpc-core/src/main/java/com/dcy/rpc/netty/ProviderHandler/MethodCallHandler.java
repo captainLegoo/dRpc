@@ -38,7 +38,7 @@ public class MethodCallHandler extends SimpleChannelInboundHandler<RequestProtoc
                     .setResponseBody(null);
         } else {
             RequestPayload requestPayload = requestProtocol.getRequestPayload();
-            ServiceConfig<?> serviceConfig = ProviderCache.SERVERS_LIST.get(requestPayload.getInterfaceName());
+            ServiceConfig<?> serviceConfig = ProviderCache.SERVERS_MAP.get(requestPayload.getInterfaceName());
 
             if (Objects.isNull(serviceConfig)) {
                 log.error("Service Not Found");

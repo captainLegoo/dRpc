@@ -244,7 +244,7 @@ public class DRpcBootstrap {
 
         // 2.If registration is successful, the service is cached locally
         if (isPublish) {
-            ProviderCache.SERVERS_LIST.put(serviceConfig.getInterfaceRef().getName(), serviceConfig);
+            ProviderCache.SERVERS_MAP.put(serviceConfig.getInterfaceRef().getName(), serviceConfig);
             return true;
         }
         return false;
