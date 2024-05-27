@@ -32,6 +32,4 @@ public interface Registry {
      * @return
      */
     List<InetSocketAddress> lookupAllAddress(String serviceName);
-
-    void UpAndDownAddress(String serviceName);
 }

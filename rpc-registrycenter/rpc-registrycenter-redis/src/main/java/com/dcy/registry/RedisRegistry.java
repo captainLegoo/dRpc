@@ -70,9 +70,4 @@ public class RedisRegistry implements Registry {
         }
         return null;
     }
-
-    @Override
-    public void UpAndDownAddress(String serviceName) {
-
-    }
 }
