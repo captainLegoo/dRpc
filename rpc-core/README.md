@@ -51,7 +51,7 @@
 - create load balancer
   - round robin
 
-11.Heartbeat detection (little bug)
+11.Heartbeat detection (Automatic detection using netty)
 
 - Consumer send
 - Provider receive
@@ -59,3 +59,8 @@
 12.Dynamic node online and offline
 
 - Using the mechanism of zkp
+
+13.Create Redis registry center
+
+- add address node to redis
+- address node need to delete when program stop
