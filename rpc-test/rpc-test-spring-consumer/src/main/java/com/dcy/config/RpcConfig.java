@@ -38,8 +38,8 @@ public class RpcConfig implements BeanPostProcessor {
                 .registry(RegistryCenterEnum.REDIS, "192.168.205.128", 6379)
                 .serialize(SerializeTypeEnum.JDK)
                 .compress(CompressTypeEnum.DEFLATE)
-                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN);
-                //.reference();
+                .loadbalancer(LoadbalancerTypeEnum.ROUND_ROBIN)
+                .reference();
 
         return DRpcBootstrap.getInstance();
     }
