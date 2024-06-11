@@ -1,9 +1,11 @@
 package com.dcy.rpc.task;
 
+import com.dcy.listen.ListenRedisServiceAddress;
 import com.dcy.rpc.bootstrap.DRpcBootstrap;
 import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.cache.NettyCache;
 import com.dcy.rpc.config.GlobalConfig;
+import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.listen.ListenZkpServiceAddress;
 import com.dcy.rpc.loadbalancer.Loadbalancer;
 import com.dcy.rpc.netty.ConsumerNettyStarter;
@@ -64,18 +66,34 @@ public class ScheduledTask {
                 TimeUnit.SECONDS);
 
         // listen address
-        String host = globalConfig.getRegistryConfig().getHost();
-        int port = globalConfig.getRegistryConfig().getPort();
-        String clientAddress = host + ":" +port;
-        Thread thread = new Thread(
-                new ListenZkpServiceAddress(
-                        clientAddress,
-                        NettyCache.PENDING_REMOVE_ADDRESS_MAP,
-                        NettyCache.PENDING_ADD_ADDRESS_MAP
-                )
-        );
-        thread.setDaemon(true);
-        thread.start();
+        if (globalConfig.getRegistryConfig().getRegistryCenterEnum().equals(RegistryCenterEnum.ZOOKEEPER)) {
+            log.info("【ZooKeeper】Start monitoring service address changes....");
+            String host = globalConfig.getRegistryConfig().getHost();
+            int port = globalConfig.getRegistryConfig().getPort();
+            String clientAddress = host + ":" +port;
+            Thread thread = new Thread(
+                    new ListenZkpServiceAddress(
+                            clientAddress,
+                            NettyCache.PENDING_REMOVE_ADDRESS_MAP,
+                            NettyCache.PENDING_ADD_ADDRESS_MAP
+                    )
+            );
+            thread.setDaemon(true);
+            thread.start();
+        } else if (globalConfig.getRegistryConfig().getRegistryCenterEnum().equals(RegistryCenterEnum.REDIS)) {
+            log.info("【Redis】Start monitoring service address changes....");
+            scheduler.scheduleWithFixedDelay(
+                    new ListenRedisServiceAddress(
+                            ConsumerCache.SERVICE_ADDRESS_MAP,
+                            NettyCache.PENDING_REMOVE_ADDRESS_MAP,
+                            NettyCache.PENDING_ADD_ADDRESS_MAP
+                    ),
+                    5,
+                    5,
+                    TimeUnit.SECONDS
+            );
+        }
+
     }
 
     private class HeartbeatDetectionTask implements Runnable {
