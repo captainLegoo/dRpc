@@ -18,7 +18,7 @@ import java.util.List;
  * @description Check the address to be launched
  */
 @Slf4j
-public class checkPendingOnlineAddress implements Runnable{
+public class CheckPendingOnlineAddress implements Runnable{
     @Override
     public void run() {
         NettyCache.PENDING_ADD_ADDRESS_MAP.forEach((serviceName, inetSocketAddressList) -> {

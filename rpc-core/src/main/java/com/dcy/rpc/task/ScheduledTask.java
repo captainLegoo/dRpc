@@ -1,22 +1,13 @@
 package com.dcy.rpc.task;
 
 import com.dcy.listen.ListenRedisServiceAddress;
-import com.dcy.rpc.bootstrap.DRpcBootstrap;
 import com.dcy.rpc.cache.ConsumerCache;
 import com.dcy.rpc.cache.NettyCache;
 import com.dcy.rpc.config.GlobalConfig;
 import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.listen.ListenZkpServiceAddress;
-import com.dcy.rpc.loadbalancer.Loadbalancer;
-import com.dcy.rpc.netty.ConsumerNettyStarter;
-import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +31,7 @@ public class ScheduledTask {
     }
 
     public void startDoingTask() {
-        scheduler.scheduleWithFixedDelay(new checkPendingOnlineAddress(),
+        scheduler.scheduleWithFixedDelay(new CheckPendingOnlineAddress(),
                 12,
                 3,
                 TimeUnit.SECONDS);
