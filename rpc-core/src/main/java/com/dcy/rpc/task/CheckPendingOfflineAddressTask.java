@@ -14,9 +14,14 @@ import java.util.List;
  * @description Check for addresses to be removed
  */
 @Slf4j
-public class CheckPendingOfflineAddressTask implements Runnable{
+public class CheckPendingOfflineAddressTask implements Runnable {
     @Override
     public void run() {
+        log.debug("Checking for addresses to be removed");
+        detectAddress();
+    }
+
+    private static void detectAddress() {
         NettyCache.CHANNEL_MAP.forEach((address, channel) -> {
             if (!channel.isActive() && !channel.isRegistered() && !channel.isOpen()) {
                 ConsumerCache.SERVICE_ADDRESS_MAP.forEach((serviceName, inetSocketAddressList) -> {

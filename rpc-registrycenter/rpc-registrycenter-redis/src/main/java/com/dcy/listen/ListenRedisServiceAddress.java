@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Dynamic offline is automatically completed by the program's shutdown hook, no manual operation is required
  */
 @Slf4j
-public class ListenRedisServiceAddress implements Runnable{
+public class ListenRedisServiceAddress implements Runnable {
 
     private final Map<String, List<InetSocketAddress>> serviceAddressMap;
     private final Map<String, List<InetSocketAddress>> pendingRemoveAddressMap;
@@ -40,45 +40,49 @@ public class ListenRedisServiceAddress implements Runnable{
     }
 
     private void listenAddress() {
+        log.debug("start listen redis service address");
         // remove offline address
-        pendingRemoveAddressMap.forEach((serviceName, addressList) -> {
-            String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
-            Set<String> serviceAddressSet = jedisUtils.sGet(key);
-
-            if (serviceAddressSet != null && !serviceAddressSet.isEmpty()) {
-                for (InetSocketAddress address : addressList) {
-                    serviceAddressSet.remove(address);
-                }
-                if (serviceAddressSet.isEmpty()) {
-                    jedisUtils.del(key);
-                } else {
-                    jedisUtils.sSet(key, serviceAddressSet.toArray(new String[0]));
-                }
-            }
-
-        });
+        //if (!pendingRemoveAddressMap.isEmpty()) {
+        //        pendingRemoveAddressMap.forEach((serviceName, addressList) -> {
+        //            String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
+        //            Set<String> serviceAddressSet = jedisUtils.sGet(key);
+        //
+        //            if (serviceAddressSet != null && !serviceAddressSet.isEmpty()) {
+        //                for (InetSocketAddress address : addressList) {
+        //                    serviceAddressSet.remove(address);
+        //                }
+        //                if (serviceAddressSet.isEmpty()) {
+        //                    jedisUtils.del(key);
+        //                } else {
+        //                    jedisUtils.sSet(key, serviceAddressSet.toArray(new String[0]));
+        //                }
+        //            }
+        //        });
+        //    }
 
         // add new address
-        serviceAddressMap.forEach((serviceName, addressList) -> {
-            String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
-            Set<String> serviceAddressSet = jedisUtils.sGet(key);
+        if (!serviceAddressMap.isEmpty()) {
+            serviceAddressMap.forEach((serviceName, addressList) -> {
+                String key = ConnectConstant.NAMESPACE + ConnectConstant.NODE_DEFAULT_PATH + serviceName;
+                Set<String> serviceAddressSet = jedisUtils.sGet(key);
 
-            if (serviceAddressSet != null && !serviceAddressSet.isEmpty()) {
-                // whether address was add
-                List<InetSocketAddress> addressFromRedisList = serviceAddressSet.stream().map(address -> {
-                    String[] split = address.split(":");
-                    return new InetSocketAddress(split[0], Integer.parseInt(split[1]));
-                }).collect(Collectors.toList());
+                if (serviceAddressSet != null && !serviceAddressSet.isEmpty()) {
+                    // whether address was add
+                    List<InetSocketAddress> addressFromRedisList = serviceAddressSet.stream().map(address -> {
+                        String[] split = address.split(":");
+                        return new InetSocketAddress(split[0], Integer.parseInt(split[1]));
+                    }).collect(Collectors.toList());
 
-                for (InetSocketAddress address : addressFromRedisList) {
-                    // add address: consumer cache does not contain address from redis
-                    if (!addressList.contains(address)) {
-                        // add to pending add address map
-                        pendingAddAddressMap.computeIfAbsent(serviceName, k -> new ArrayList<>()).add(address);
-                        log.debug("Address 【{}】 has been successfully added to the pending map cache...", address);
+                    for (InetSocketAddress address : addressFromRedisList) {
+                        // add address: consumer cache does not contain address from redis
+                        if (!addressList.contains(address)) {
+                            // add to pending add address map
+                            pendingAddAddressMap.computeIfAbsent(serviceName, k -> new ArrayList<>()).add(address);
+                            log.debug("Address 【{}】 has been successfully added to the pending map cache...", address);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 }

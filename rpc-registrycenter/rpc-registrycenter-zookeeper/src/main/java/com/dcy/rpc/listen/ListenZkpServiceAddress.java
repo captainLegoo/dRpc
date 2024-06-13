@@ -37,7 +37,6 @@ public class ListenZkpServiceAddress implements Runnable{
 
     @Override
     public void run() {
-        log.info("Start monitoring service address changes....");
         listenAddress();
     }
 
