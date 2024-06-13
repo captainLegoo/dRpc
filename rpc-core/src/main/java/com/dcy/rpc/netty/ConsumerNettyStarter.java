@@ -33,7 +33,6 @@ public class ConsumerNettyStarter {
         NioEventLoopGroup eventExecutors = new NioEventLoopGroup();
         bootstrap.group(eventExecutors)
                 .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_BACKLOG, 1024)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
