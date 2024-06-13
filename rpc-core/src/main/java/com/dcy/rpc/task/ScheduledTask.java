@@ -8,9 +8,7 @@ import com.dcy.rpc.enumeration.RegistryCenterEnum;
 import com.dcy.rpc.listen.ListenZkpServiceAddress;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Kyle
@@ -23,23 +21,16 @@ import java.util.concurrent.TimeUnit;
 public class ScheduledTask {
 
     private final GlobalConfig globalConfig;
-    private final ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduledExecutorService = ScheduledThreadPool.getScheduledExecutorService();
 
     public ScheduledTask(GlobalConfig globalConfig) {
         this.globalConfig = globalConfig;
-        this.scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void startDoingTask() {
-        scheduler.scheduleWithFixedDelay(new CheckPendingOnlineAddress(),
-                12,
-                3,
-                TimeUnit.SECONDS);
 
-        scheduler.scheduleWithFixedDelay(new CheckPendingOfflineAddressTask(),
-                14,
-                3,
-                TimeUnit.SECONDS);
+        scheduleFixedDelayTask(scheduledExecutorService, new CheckPendingOnlineAddress(), 5, 3);
+        scheduleFixedDelayTask(scheduledExecutorService, new CheckPendingOfflineAddressTask(), 5, 3);
 
         // listen address
         if (globalConfig.getRegistryConfig().getRegistryCenterEnum().equals(RegistryCenterEnum.ZOOKEEPER)) {
@@ -47,28 +38,29 @@ public class ScheduledTask {
             String host = globalConfig.getRegistryConfig().getHost();
             int port = globalConfig.getRegistryConfig().getPort();
             String clientAddress = host + ":" +port;
-            Thread thread = new Thread(
-                    new ListenZkpServiceAddress(
-                            clientAddress,
-                            NettyCache.PENDING_REMOVE_ADDRESS_MAP,
-                            NettyCache.PENDING_ADD_ADDRESS_MAP
-                    )
-            );
-            thread.setDaemon(true);
-            thread.start();
+            scheduledExecutorService.submit(new ListenZkpServiceAddress(
+                    clientAddress,
+                        NettyCache.PENDING_REMOVE_ADDRESS_MAP,
+                        NettyCache.PENDING_ADD_ADDRESS_MAP
+            ));
         } else if (globalConfig.getRegistryConfig().getRegistryCenterEnum().equals(RegistryCenterEnum.REDIS)) {
             log.info("【Redis】Start monitoring service address changes....");
-            scheduler.scheduleWithFixedDelay(
-                    new ListenRedisServiceAddress(
-                            ConsumerCache.SERVICE_ADDRESS_MAP,
-                            NettyCache.PENDING_REMOVE_ADDRESS_MAP,
-                            NettyCache.PENDING_ADD_ADDRESS_MAP
-                    ),
-                    5,
-                    5,
-                    TimeUnit.SECONDS
-            );
+            scheduleFixedDelayTask(scheduledExecutorService, new ListenRedisServiceAddress(
+                    ConsumerCache.SERVICE_ADDRESS_MAP,
+                    NettyCache.PENDING_REMOVE_ADDRESS_MAP,
+                    NettyCache.PENDING_ADD_ADDRESS_MAP
+            ), 5, 5);
         }
     }
 
+    /**
+     * schedule fixed delay task
+     * @param scheduler
+     * @param task
+     * @param initialDelay
+     * @param delay
+     */
+    private void scheduleFixedDelayTask(ScheduledExecutorService scheduler, Runnable task, long initialDelay, long delay) {
+        scheduler.scheduleWithFixedDelay(task, initialDelay, delay, TimeUnit.SECONDS);
+    }
 }
